@@ -42,7 +42,6 @@
         if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
         const text = await res.text();
         $log.textContent = text;
-        $status.textContent = `最終更新: ${new Date().toLocaleString()}`;
       } catch (err) {
         $log.textContent = '読み込みに失敗しました。';
         $status.textContent = String(err);
