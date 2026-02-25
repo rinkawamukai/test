@@ -5,21 +5,16 @@
   <meta charset="utf-8" />
   <title>Gallery</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <!-- ✅ CSSは純粋に読み込むだけ -->
-  <link rel="stylesheet" href="./の追加スタイルを書く -->
-  <style>
-    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px,1fr)); gap: 16px; padding: 16px; }
-    .frame { background:#0b0d12; border:1px solid #232b3a; border-radius:12px; padding:12px; }
-    .mat   { border:10px solid #e9e4da; background:#3f2d22;
-             background-image: linear-gradient(135deg,#3f2d22,#6b4a2f 35%,#3a281d 70%,#6b4a2f); }
-    .mat img { display:block; width:100%; height:auto; background:#111; border-radius:3px;
-               box-shadow: 0 2px 6px rgba(0,0,0,.8), inset 0 0 0 1px rgba(255,255,255,.08); }
-    .cap { text-align:center; color:#a7afbf; font-size:12px; margin-top:8px; word-break: break-all; }
-  </style>
+  <link rel="stylesheet" href="./index.css" : grid; grid-template-columns: repeat(auto-fill, minmax(220px,1fr)); gap:
+    16px; padding: 16px; } .frame { background:#0b0d12; border:1px solid #232b3a; border-radius:12px; padding:12px; }
+    .mat { border:10px solid #e9e4da; background:#3f2d22; background-image: linear-gradient(135deg,#3f2d22,#6b4a2f
+    35%,#3a281d 70%,#6b4a2f); } .mat img { display:block; width:100%; height:auto; background:#111; border-radius:3px;
+    box-shadow: 0 2px 6px rgba(0,0,0,.8), inset 0 0 0 1px rgba(255,255,255,.08); } .cap { text-align:center;
+    color:#a7afbf; font-size:12px; margin-top:8px; word-break: break-all; } </style>
 </head>
+
 <body>
-  <div id=" grid" class="grid" aria-live="polite">
-  </div>
+  <div id="grid" class="grid" aria-live="polite"></div>
 
   <template id="tpl">
     <figure class="frame">
@@ -31,50 +26,38 @@
   <script>
     async function listByManifest() {
       // /gallery/manifest.json に ["a.png","b.png"] 形式で置く
-      const url = './gallery/manifest.json';
-      let res;
-      try {
-        res = await fetch(url, { cache: 'no-cache' });
-      } catch (e) {
-        throw new Error('ネットワーク/オリジンエラー（file:// では動きません。https:// で開いてください）');
-      }
-      if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}（${url}）`);
-      let arr;
-      try {
-        arr = await res.json();
-      } catch (e) {
-        throw new Error('JSON 構文エラー（manifest.json を ["a.png","b.png"] の配列に）');
-      }
-      if (!Array.isArray(arr)) throw new Error('JSON 形式エラー（配列ではありません）');
-      return arr.filter(n => typeof n === 'string' && /\.png$/i.test(n));
+      const r = await fetch('./gallery/manifest.json', { cache: 'no-cache' });
+      if (!r.ok) return [];
+      const arr = await r.json();
+      return arr.filter(n => /\.png$/i.test(n));
     }
 
     async function main() {
+      const names = await listByManifest();
       const grid = document.getElementById('grid');
       const tpl = document.getElementById('tpl');
-      try {
-        const names = await listByManifest();
-        if (!names.length) {
-          grid.innerHTML = '<p style="color:#a7afbf;padding:16px">manifest.json は読めましたが .png が 0 件です。</p>';
-          return;
-        }
-        const frag = document.createDocumentFragment();
-        for (const name of names) {
-          const node = tpl.content.cloneNode(true);
-          node.querySelector('img').src = `./gallery/${name}`;
-          node.querySelector('img').alt = name;
-          node.querySelector('.cap').textContent = name;
-          frag.appendChild(node);
-        }
-        grid.textContent = '';
-        grid.appendChild(frag);
-      } catch (err) {
-        console.error(err);
-        grid.innerHTML = `<p style="color:#ff6b7a;padding:16px">画像リストの取得に失敗しました。<br><small>${String(err)}</small></p>`;
+
+      if (!names.length) {
+        grid.innerHTML = '<p style="color:#a7afbf;padding:16px">画像が見つかりません。（/gallery/manifest.json を作成してください）</p>';
+        return;
       }
+      const frag = document.createDocumentFragment();
+      names.forEach(name => {
+        const node = tpl.content.cloneNode(true);
+        node.querySelector('img').src = `./gallery/${name}`;
+        node.querySelector('img').alt = name;
+        node.querySelector('.cap').textContent = name;
+        frag.appendChild(node);
+      });
+      grid.appendChild(frag);
     }
-    main();
+
+    main().catch(e => {
+      document.getElementById('grid').innerHTML =
+        '<p style="color:#ff6b7a;padding:16px">画像リストの取得に失敗しました。（manifest.json を確認）</p>';
+      console.error(e);
+    });
   </script>
-  </body>
+</body>
 
 </html>
