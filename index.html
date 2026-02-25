@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -53,11 +54,11 @@
     const IMAGES = [
       "background.png", "yatai.png", "ramain.png", "sokun.png", "nngk.png"
     ];
-    const GALLERY_BASE   = "./gallery/";
+    const GALLERY_BASE = "./gallery/";
 
     // ログ
-    const LOG_URL        = "./public/log.txt";
-    const LOG_TTL_MS     = 30 * 1000;   // ログキャッシュ 30秒
+    const LOG_URL = "./public/log.txt";
+    const LOG_TTL_MS = 30 * 1000;   // ログキャッシュ 30秒
 
     // 勉強したこと（テキストファイルの「ファイル名だけ」を列挙）
     const KNOWLEDGE = [
@@ -69,37 +70,37 @@
     const KNOWLEDGE_BASE = "./knowledge/";
     /************************************************************/
 
-    (function initTabs(){
+    (function initTabs() {
       const tabs = Array.from(document.querySelectorAll('.tabbar .tab'));
       const views = {
-        time:      document.getElementById('view-time'),
-        gallery:   document.getElementById('view-gallery'),
+        time: document.getElementById('view-time'),
+        gallery: document.getElementById('view-gallery'),
         knowledge: document.getElementById('view-knowledge'),
       };
 
-      let galleryRendered   = false;
+      let galleryRendered = false;
       let knowledgeRendered = false;
 
       // ログのキャッシュ
       let lastLogText = null;
-      let lastLogAt   = 0;
+      let lastLogAt = 0;
 
       // 勉強したことの内容キャッシュ
       const knCache = new Map();
 
       function show(name) {
         // 表示切替
-        Object.entries(views).forEach(([key, el])=>{
+        Object.entries(views).forEach(([key, el]) => {
           el.classList.toggle('is-active', key === name);
         });
         // タブ状態
-        tabs.forEach(btn=>{
+        tabs.forEach(btn => {
           const active = btn.dataset.target === name;
           btn.classList.toggle('is-active', active);
           btn.setAttribute('aria-selected', active ? 'true' : 'false');
         });
         // ハッシュ更新
-        history.replaceState(null, '', '#'+name);
+        history.replaceState(null, '', '#' + name);
 
         // 初回処理
         if (name === 'gallery' && !galleryRendered) {
@@ -108,7 +109,7 @@
         } else if (name === 'time') {
           const now = Date.now();
           if (!lastLogText || now - lastLogAt > LOG_TTL_MS) {
-            fetchLog().catch(()=>{});
+            fetchLog().catch(() => { });
           } else {
             setLog(lastLogText, lastLogAt);
           }
@@ -118,13 +119,13 @@
         }
       }
 
-      tabs.forEach(btn=>{
-        btn.addEventListener('click', ()=> show(btn.dataset.target));
+      tabs.forEach(btn => {
+        btn.addEventListener('click', () => show(btn.dataset.target));
       });
 
       // デフォルトは #time（ログ）
-      const h = (location.hash || '#time').replace('#','');
-      show(['gallery','knowledge'].includes(h) ? h : 'time');
+      const h = (location.hash || '#time').replace('#', '');
+      show(['gallery', 'knowledge'].includes(h) ? h : 'time');
 
       /* ---------- ギャラリー ---------- */
       function renderGallery() {
@@ -134,14 +135,14 @@
           return;
         }
         const frag = document.createDocumentFragment();
-        IMAGES.forEach(src=>{
+        IMAGES.forEach(src => {
           const fig = document.createElement('figure'); fig.className = 'card';
           const frame = document.createElement('div'); frame.className = 'frame';
           const img = document.createElement('img');
           img.loading = 'lazy'; img.decoding = 'async';
           img.src = resolvePathImage(src);
           img.alt = src.split('/').pop();
-          img.onerror = ()=>{ img.alt = '(読み込み失敗) ' + img.alt; };
+          img.onerror = () => { img.alt = '(読み込み失敗) ' + img.alt; };
           frame.appendChild(img);
           fig.appendChild(frame);
           const cap = document.createElement('figcaption'); cap.className = 'caption';
@@ -153,7 +154,7 @@
       }
 
       /* ---------- ログ ---------- */
-      async function fetchLog(force=false) {
+      async function fetchLog(force = false) {
         const status = document.getElementById('log-status');
         status.textContent = '取得中…';
         const res = await fetch(
@@ -163,7 +164,7 @@
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const text = await res.text();
         lastLogText = text;
-        lastLogAt   = Date.now();
+        lastLogAt = Date.now();
         setLog(text, lastLogAt);
       }
       function setLog(text, ts) {
@@ -171,7 +172,7 @@
         pre.textContent = text;
         const status = document.getElementById('log-status');
         const d = new Date(ts);
-        status.textContent = `取得: ${d.toLocaleString()}（キャッシュ ${Math.floor(LOG_TTL_MS/1000)}秒）`;
+        status.textContent = `取得: ${d.toLocaleString()}（キャッシュ ${Math.floor(LOG_TTL_MS / 1000)}秒）`;
       }
 
       /* ---------- 勉強したこと ---------- */
@@ -186,13 +187,13 @@
         }
 
         const frag = document.createDocumentFragment();
-        KNOWLEDGE.forEach(name=>{
+        KNOWLEDGE.forEach(name => {
           const fig = document.createElement('figure'); fig.className = 'card';
           const btn = document.createElement('button');
           btn.className = 'btn kn-item';
           btn.type = 'button';
           btn.textContent = name;         // テキスト名のみ表示
-          btn.addEventListener('click', ()=> openKnowledge(name));
+          btn.addEventListener('click', () => openKnowledge(name));
           fig.appendChild(btn);
           frag.appendChild(fig);
         });
@@ -200,15 +201,15 @@
         countEl.textContent = 'ファイル数: ' + KNOWLEDGE.length;
 
         // 閉じるボタン
-        document.getElementById('kn-close').addEventListener('click', ()=>{
+        document.getElementById('kn-close').addEventListener('click', () => {
           document.getElementById('kn-viewer').classList.add('hidden');
         });
       }
 
       async function openKnowledge(name) {
         const viewer = document.getElementById('kn-viewer');
-        const label  = document.getElementById('kn-current');
-        const pre    = document.getElementById('kn-content');
+        const label = document.getElementById('kn-current');
+        const pre = document.getElementById('kn-content');
 
         label.textContent = name;
 
@@ -245,5 +246,5 @@
     })();
   </script>
 </body>
-</html>
 
+</html>
