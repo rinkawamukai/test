@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8" />
+  <title>My Pages</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <!-- ✅ CSS はここで読み込む。index.html と同じ階層に index.css がある前提 -->
+  <link rel="stylesheet" href="./index.css" のみ（これは head ではなく body の中に置く） -->
+  <header class="topbar">
+    <nav class="tabs" role="tablist" aria-label="コンテンツ切替">
+      <button class="tab active" role="tab" data-target="gallery.html" aria-selected="true">Gallery</button>
+      <button class="tab" role="tab" data-target="time.html" aria-selected="false">Time Log</button>
+    </nav>
+  </header>
+
+  <!-- タブで切り替わる表示領域 -->
+  <main class="viewer">
+    <!-- ✅ iframe は閉じタグにしない（中に JS は入れない） -->
+    <iframe id="viewer" title="content" src="gallery.html" pt> タグ内に -->
+      <script>
+        const tabs = [...document.querySelectorAll('.tab')];
+        const frame = document.getElementById('viewer');
+
+        // ハッシュ（#gallery / #time）で復元できるように
+        const routes = { gallery: 'gallery.html', time: 'time.html' };
+
+        function activate(targetPath) {
+          const targetURL = new URL(targetPath, location.href).href;
+          if (frame.src !== targetURL) frame.src = targetPath;
+
+          tabs.forEach(btn => {
+            const on = btn.dataset.target === targetPath;
+            btn.classList.toggle('active', on);
+            btn.setAttribute('aria-selected', on ? 'true' : 'false');
+          });
+
+          const key = Object.entries(routes).find(([, p]) => p === targetPath)?.[0];
+          if (key) history.replaceState(null, '', `#${key}`);
+        }
+
+        tabs.forEach(btn => {
+          btn.addEventListener('click', () => activate(btn.dataset.target));
+        });
+
+        // 初期表示：ハッシュ優先
+        (function initFromHash() {
+          const key = location.hash.replace('#', '');
+          if (routes[key]) activate(routes[key]); else activate('gallery.html');
+        })();
+
+        // 外部からハッシュ変更された場合も反映
+        window.addEventListener('hashchange', () => {
+          const key = location.hash.replace('#', '');
+          if (routes[key]) activate(routes[key]);
+        });
+      </script>
+      </body>
+
+</html>

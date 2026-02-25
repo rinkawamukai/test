@@ -1,0 +1,77 @@
+:root {
+  --bg: #0f1115;
+  --panel: #151922;
+  --border: #232b3a;
+  --text: #e7eaf0;
+  --muted: #a7afbf;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font: 15px/1.6 system-ui, -apple-system, "Segoe UI",
+    "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+}
+
+/* タブバー */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: linear-gradient(180deg, #0f1115, rgba(15, 17, 21, .85));
+  border-bottom: 1px solid var(--border);
+  padding: 8px 10px;
+}
+
+.tabs {
+  display: flex;
+  gap: 6px;
+}
+
+.tab {
+  appearance: none;
+  border: 1px solid var(--border);
+  background: #1a2030;
+  color: var(--muted);
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: .15s ease;
+}
+
+.tab:hover {
+  color: #fff;
+  background: #21283a;
+}
+
+.tab.active,
+.tab[aria-selected="true"] {
+  color: white;
+  background: #2a334a;
+  border-color: #33415a;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .05);
+}
+
+/* iframe 埋め込み領域 */
+.viewer {
+  height: calc(100vh - 50px);
+}
+
+.viewer iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: var(--panel);
+}
