@@ -97,3 +97,27 @@ body {
 *::-webkit-scrollbar-thumb { background:#2a3440; border-radius:8px; }
 *::-webkit-scrollbar-thumb:hover { background:#344152; }
 *::-webkit-scrollbar-track { background:#0f1419; }
+
+
+/* --- 勉強したこと（テキスト一覧＋ビューア）追加分 --- */
+.hidden { display: none !important; }
+
+.kn-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  font-weight: 600;
+  background: #1a2430;
+  border-color: rgba(255,255,255,.10);
+}
+.kn-item:hover { background: #202c3a; }
+
+.kn-viewer { margin-top: 12px; }
+.kn-viewer-bar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
