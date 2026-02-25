@@ -23,7 +23,7 @@
     function resolvePath(p) {
       // 絶対URL or ルート始まりはそのまま。それ以外は /gallery/ を付与
       if (/^https?:\/\//i.test(p) || p.startsWith('/')) return p;
-      return '/gallery/' + p;
+      return './gallery/' + p;
     }
 
     async function loadManifest() {
@@ -78,3 +78,4 @@
 
 
 </html>
+
