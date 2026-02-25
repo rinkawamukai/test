@@ -1,60 +1,63 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ja">
 
 <head>
   <meta charset="utf-8" />
-  <title>My Pages</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <!-- ✅ CSS はここで読み込む。index.html と同じ階層に index.css がある前提 -->
-  <link rel="stylesheet" href="./index.css" のみ（これは head ではなく body の中に置く） -->
-  <header class="topbar">
-    <nav class="tabs" role="tablist" aria-label="コンテンツ切替">
-      <button class="tab active" role="tab" data-target="gallery.html" aria-selected="true">Gallery</button>
-      <button class="tab" role="tab" data-target="time.html" aria-selected="false">Time Log</button>
-    </nav>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tabs</title>
+  <link rel="stylesheet" href="./index.css" />
+</head>
+
+<body>
+  <header class="tabbar" role="tablist" aria-label="ビュー切替">
+    <button class="tab is-active" role="tab" aria-selected="true" data-target="gallery.html">川向ギャラリー</button>
+    <button class="tab" role="tab" aria-selected="false" data-target="time.html">早朝対応日一覧</button>
   </header>
 
-  <!-- タブで切り替わる表示領域 -->
-  <main class="viewer">
-    <!-- ✅ iframe は閉じタグにしない（中に JS は入れない） -->
-    <iframe id="viewer" title="content" src="gallery.html" pt> タグ内に -->
-      <script>
-        const tabs = [...document.querySelectorAll('.tab')];
-        const frame = document.getElementById('viewer');
+  <main class="main">
+    <!-- 1つの iframe の src を切り替える方式 -->
+    <iframe id="contentFrame" class="view-frame" title="コンテンツ" src="gallery.html" loading="eager"></iframe>
+  </main>
 
-        // ハッシュ（#gallery / #time）で復元できるように
-        const routes = { gallery: 'gallery.html', time: 'time.html' };
+  <script>
+    (function () {
+      const frame = document.getElementById('contentFrame');
+      const tabs = Array.from(document.querySelectorAll('.tabbar .tab'));
 
-        function activate(targetPath) {
-          const targetURL = new URL(targetPath, location.href).href;
-          if (frame.src !== targetURL) frame.src = targetPath;
-
-          tabs.forEach(btn => {
-            const on = btn.dataset.target === targetPath;
-            btn.classList.toggle('active', on);
-            btn.setAttribute('aria-selected', on ? 'true' : 'false');
-          });
-
-          const key = Object.entries(routes).find(([, p]) => p === targetPath)?.[0];
-          if (key) history.replaceState(null, '', `#${key}`);
-        }
-
+      function setActive(target) {
+        // 切替
+        frame.src = target;
+        // タブの ARIA とクラス更新
         tabs.forEach(btn => {
-          btn.addEventListener('click', () => activate(btn.dataset.target));
+          const active = btn.dataset.target === target;
+          btn.classList.toggle('is-active', active);
+          btn.setAttribute('aria-selected', active ? 'true' : 'false');
         });
+        // ハッシュに状態を保存（例: #gallery / #time）
+        const hash = target.includes('time') ? '#time' : '#gallery';
+        history.replaceState(null, '', hash);
+      }
 
-        // 初期表示：ハッシュ優先
-        (function initFromHash() {
-          const key = location.hash.replace('#', '');
-          if (routes[key]) activate(routes[key]); else activate('gallery.html');
-        })();
+      // クリックで切替
+      tabs.forEach(btn => {
+        btn.addEventListener('click', () => setActive(btn.dataset.target));
+      });
 
-        // 外部からハッシュ変更された場合も反映
-        window.addEventListener('hashchange', () => {
-          const key = location.hash.replace('#', '');
-          if (routes[key]) activate(routes[key]);
-        });
-      </script>
-      </body>
+      // ハッシュで初期タブ選択
+      const h = location.hash.replace('#', '');
+      if (h === 'time') setActive('time.html');
+      else setActive('gallery.html');
+
+      // 画面高に応じて iframe の高さを調整（CSS計算に加えてモバイルアドレスバー対策）
+      function resize() {
+        const tabbar = document.querySelector('.tabbar');
+        const h = window.innerHeight - (tabbar?.offsetHeight || 0);
+        frame.style.height = h + 'px';
+      }
+      window.addEventListener('resize', resize);
+      resize();
+    })();
+  </script>
+</body>
 
 </html>

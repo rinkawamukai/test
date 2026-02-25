@@ -1,62 +1,78 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ja">
 
 <head>
   <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Gallery</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <link rel="stylesheet" href="./index.css" : grid; grid-template-columns: repeat(auto-fill, minmax(220px,1fr)); gap:
-    16px; padding: 16px; } .frame { background:#0b0d12; border:1px solid #232b3a; border-radius:12px; padding:12px; }
-    .mat { border:10px solid #e9e4da; background:#3f2d22; background-image: linear-gradient(135deg,#3f2d22,#6b4a2f
-    35%,#3a281d 70%,#6b4a2f); } .mat img { display:block; width:100%; height:auto; background:#111; border-radius:3px;
-    box-shadow: 0 2px 6px rgba(0,0,0,.8), inset 0 0 0 1px rgba(255,255,255,.08); } .cap { text-align:center;
-    color:#a7afbf; font-size:12px; margin-top:8px; word-break: break-all; } </style>
+  <link rel="stylesheet" href="./index.css" />
 </head>
 
 <body>
-  <div id="grid" class="grid" aria-live="polite"></div>
-
-  <template id="tpl">
-    <figure class="frame">
-      <div class="mat"><img alt="" loading="lazy"></div>
-      <figcaption class="cap"></figcaption>
-    </figure>
-  </template>
-
+  <main class="page page--gallery">
+    <div id="grid" class="grid" aria-live="polite"></div>
+  </main>
   <script>
-    async function listByManifest() {
-      // /gallery/manifest.json に ["a.png","b.png"] 形式で置く
-      const r = await fetch('./gallery/manifest.json', { cache: 'no-cache' });
-      if (!r.ok) return [];
-      const arr = await r.json();
-      return arr.filter(n => /\.png$/i.test(n));
+    // 指定: /gallery/manifest.json に列挙された PNG をすべて表示
+    // 想定フォーマット：
+    //  1) ["a.png","b.png", ...]
+    //  2) { "images": ["a.png","b.png"] }
+
+    const MANIFEST_URL = '/gallery/manifest.json';
+
+    function resolvePath(p) {
+      // 絶対URL or ルート始まりはそのまま。それ以外は /gallery/ を付与
+      if (/^https?:\/\//i.test(p) || p.startsWith('/')) return p;
+      return '/gallery/' + p;
     }
 
-    async function main() {
-      const names = await listByManifest();
+    async function loadManifest() {
+      const u = MANIFEST_URL + '?t=' + Date.now(); // キャッシュ回避
+      const res = await fetch(u, { cache: 'no-store' });
+      if (!res.ok) throw new Error('manifest の取得に失敗: ' + res.status);
+      const data = await res.json();
+      const list = Array.isArray(data) ? data : (Array.isArray(data?.images) ? data.images : []);
+      return list.filter(Boolean).map(String);
+    }
+
+    function createCard(src) {
       const grid = document.getElementById('grid');
-      const tpl = document.getElementById('tpl');
+      const card = document.createElement('figure');
+      card.className = 'card';
 
-      if (!names.length) {
-        grid.innerHTML = '<p style="color:#a7afbf;padding:16px">画像が見つかりません。（/gallery/manifest.json を作成してください）</p>';
-        return;
-      }
-      const frag = document.createDocumentFragment();
-      names.forEach(name => {
-        const node = tpl.content.cloneNode(true);
-        node.querySelector('img').src = `./gallery/${name}`;
-        node.querySelector('img').alt = name;
-        node.querySelector('.cap').textContent = name;
-        frag.appendChild(node);
-      });
-      grid.appendChild(frag);
+      const frame = document.createElement('div');
+      frame.className = 'frame';
+
+      const img = document.createElement('img');
+      img.loading = 'lazy';
+      img.decoding = 'async';
+      img.src = resolvePath(src);
+      img.alt = src.split('/').pop();
+
+      frame.appendChild(img);
+      card.appendChild(frame);
+
+      const cap = document.createElement('figcaption');
+      cap.className = 'caption';
+      cap.textContent = img.alt;
+      card.appendChild(cap);
+
+      grid.appendChild(card);
     }
 
-    main().catch(e => {
-      document.getElementById('grid').innerHTML =
-        '<p style="color:#ff6b7a;padding:16px">画像リストの取得に失敗しました。（manifest.json を確認）</p>';
-      console.error(e);
-    });
+    (async function () {
+      const grid = document.getElementById('grid');
+      try {
+        const items = await loadManifest();
+        if (!items.length) {
+          grid.innerHTML = '<p class="muted">manifest に画像が見つかりませんでした。</p>';
+          return;
+        }
+        items.forEach(createCard);
+      } catch (e) {
+        grid.innerHTML = '<p class="error">読み込みエラー: ' + (e?.message || e) + '</p>';
+      }
+    })();
   </script>
 </body>
 

@@ -1,29 +1,32 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ja">
 
 <head>
   <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Time Log</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <link rel="stylesheet" href="./{ min-height: 200px; padding: 16px; margin: 16px;
-           background:#0d1017; border:1px solid #232b3a; border-radius:10px; white-space:pre-wrap; }
-  </style>
+  <link rel="stylesheet" href="./index.css" />
+  <meta http-equiv="Cache-Control" content="no-store" />
 </head>
+
 <body>
-  <pre id=" log" class="log" aria-live="polite">
-  </pre>
+  <main class="page page--time">
+    <pre id="log" class="log" aria-label="log.txt の内容（読み取り専用）"></pre>
+  </main>
   <script>
-    (async () => {
+    const LOG_URL = '/public/log.txt';
+    (async function () {
+      const pre = document.getElementById('log');
       try {
-        const r = await fetch('./public/log.txt', { cache: 'no-cache' });
-        if (!r.ok) return (document.getElementById('log').textContent = 'ファイルが空です');
-        const t = (await r.text()).replace(/\uFEFF/g, '');
-        document.getElementById('log').textContent = t.trim() ? t : 'ファイルが空です';
-      } catch {
-        document.getElementById('log').textContent = 'ファイルが空です';
+        const res = await fetch(LOG_URL + '?t=' + Date.now(), { cache: 'no-store' });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const text = await res.text();
+        pre.textContent = text; // 「そのまま表示」したいので textContent を利用
+      } catch (e) {
+        pre.textContent = '読み込みエラー: ' + (e?.message || e);
       }
     })();
   </script>
-  </body>
+</body>
 
 </html>
