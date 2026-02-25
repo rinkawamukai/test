@@ -9,57 +9,53 @@
 </head>
 
 <body>
-  <header class="tabbar" role="tablist" aria-label="ビュー切替">
-    <button class="tab" role="tab" aria-selected="false" data-target="time.html">早朝対応日一覧</button>
-    <button class="tab is-active" role="tab" aria-selected="true" data-target="gallery.html">川向ギャラリー</button>
-  </header>
 
-  <main class="main">
-    <!-- 1つの iframe の src を切り替える方式 -->
-    <iframe id="contentFrame" class="view-frame" title="コンテンツ" src="gallery.html" loading="eager"></iframe>
-  </main>
 
-  <script>
-    (function () {
-      const frame = document.getElementById('contentFrame');
-      const tabs = Array.from(document.querySelectorAll('.tabbar .tab'));
 
-      function setActive(target) {
-        // 切替
-        frame.src = target;
-        // タブの ARIA とクラス更新
-        tabs.forEach(btn => {
-          const active = btn.dataset.target === target;
-          btn.classList.toggle('is-active', active);
-          btn.setAttribute('aria-selected', active ? 'true' : 'false');
-        });
-        // ハッシュに状態を保存（例: #gallery / #time）
-        const hash = target.includes('time') ? '#time' : '#gallery';
-        history.replaceState(null, '', hash);
-      }
+<header class="tabbar" role="tablist" aria-label="ビュー切替">
+  <button class="tab is-active" role="tab" aria-selected="true" data-target="gallery">ギャラリー</button>
+  <button class="tab" role="tab" aria-selected="false" data-target="time">ログ</button>
+</header>
 
-      // クリックで切替
-      tabs.forEach(btn => {
-        btn.addEventListener('click', () => setActive(btn.dataset.target));
+<main class="main">
+  <!-- 2枚のiframeを最初から読み込んでおく -->
+  <iframe id="view-time" class="view-frame" title="ログ" src="time.html"></iframe>
+  <iframe id="view-gallery" class="view-frame is-active" title="ギャラリー" src="gallery.html"></iframe>
+</main>
+
+<script>
+  (function() {
+    const tabs = [...document.querySelectorAll('.tabbar .tab')];
+    const frames = {
+      gallery: document.getElementById('view-gallery'),
+      time: document.getElementById('view-time'),
+    };
+
+    function setActive(name) {
+      // 表示切替（srcは触らない = 再読込しない）
+      Object.entries(frames).forEach(([key, el]) => {
+        el.classList.toggle('is-active', key === name);
       });
+      tabs.forEach(btn => {
+        const active = btn.dataset.target === name;
+        btn.classList.toggle('is-active', active);
+        btn.setAttribute('aria-selected', active ? 'true' : 'false');
+      });
+      history.replaceState(null, '', '#' + name);
+    }
 
-      // ハッシュで初期タブ選択
-      const h = location.hash.replace('#', '');
-      if (h === 'gallery') setActive('gallery.html');
-      else setActive('time.html');
+    tabs.forEach(btn => {
+      btn.addEventListener('click', () => setActive(btn.dataset.target));
+    });
 
-      // 画面高に応じて iframe の高さを調整（CSS計算に加えてモバイルアドレスバー対策）
-      function resize() {
-        const tabbar = document.querySelector('.tabbar');
-        const h = window.innerHeight - (tabbar?.offsetHeight || 0);
-        frame.style.height = h + 'px';
-      }
-      window.addEventListener('resize', resize);
-      resize();
-    })();
-  </script>
+    const h = (location.hash || '#time').replace('#','');
+    setActive(h === 'gallery' ? 'gallery' : 'time');
+  })();
+</script>
+
 </body>
 
 
 </html>
+
 
