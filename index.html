@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="ja">
-
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -10,9 +9,10 @@
 
 <body>
   <header class="tabbar" role="tablist" aria-label="ビュー切替">
-    <!-- タブ順を「ログ → ギャラリー」に逆転、デフォルトはログをアクティブに -->
+    <!-- デフォルトはログをアクティブに -->
     <button class="tab is-active" role="tab" aria-selected="true" data-target="time">早朝出勤日一覧</button>
     <button class="tab" role="tab" aria-selected="false" data-target="gallery">川向ギャラリー</button>
+    <button class="tab" role="tab" aria-selected="false" data-target="knowledge">勉強したこと</button>
   </header>
 
   <main class="main">
@@ -24,46 +24,80 @@
       <pre id="log" class="logbox" aria-label="log.txt の内容（読み取り専用）"></pre>
     </section>
 
-    <!-- ギャラリー（非表示で開始） -->
+    <!-- ギャラリー -->
     <section id="view-gallery" class="view" aria-labelledby="tab-gallery">
       <div id="grid" class="grid" aria-live="polite"></div>
+    </section>
+
+    <!-- 勉強したこと（テキスト一覧 + 内容表示） -->
+    <section id="view-knowledge" class="view" aria-labelledby="tab-knowledge">
+      <div class="toolbar">
+        <span id="kn-count" class="muted">ファイル数: 0</span>
+      </div>
+      <div id="kn-list" class="grid" aria-live="polite"></div>
+
+      <!-- 内容表示パネル（クリック時に開く） -->
+      <div id="kn-viewer" class="kn-viewer hidden">
+        <div class="kn-viewer-bar">
+          <span id="kn-current" class="time"></span>
+          <button id="kn-close" class="btn">閉じる</button>
+        </div>
+        <pre id="kn-content" class="logbox" aria-label="テキスト内容（読み取り専用）"></pre>
+      </div>
     </section>
   </main>
 
   <script>
-    /*** 設定エリア（必要に応じて編集） ****************************/
+    /*** 設定エリア *********************************************/
+    // ギャラリー（PNGなど）
     const IMAGES = [
       "background.png", "yatai.png", "ramain.png", "sokun.png", "nngk.png"
     ];
-    const GALLERY_BASE = "./gallery/";   // 画像の基準パス
-    const LOG_URL = "./public/log.txt"; // ログファイル
-    const LOG_TTL_MS = 30 * 1000;      // ログキャッシュ 30秒
-    /***************************************************************/
+    const GALLERY_BASE   = "./gallery/";
 
-    (function initTabs() {
+    // ログ
+    const LOG_URL        = "./public/log.txt";
+    const LOG_TTL_MS     = 30 * 1000;   // ログキャッシュ 30秒
+
+    // 勉強したこと（テキストファイルの「ファイル名だけ」を列挙）
+    const KNOWLEDGE = [
+      // 例: "notes-css.txt", "hash-functions.txt", "png-format.txt"
+      // "./knowledge/" を基準に読み込みます
+    ];
+    const KNOWLEDGE_BASE = "./knowledge/";
+    /************************************************************/
+
+    (function initTabs(){
       const tabs = Array.from(document.querySelectorAll('.tabbar .tab'));
       const views = {
-        gallery: document.getElementById('view-gallery'),
-        time: document.getElementById('view-time'),
+        time:      document.getElementById('view-time'),
+        gallery:   document.getElementById('view-gallery'),
+        knowledge: document.getElementById('view-knowledge'),
       };
 
-      let galleryRendered = false;
+      let galleryRendered   = false;
+      let knowledgeRendered = false;
+
+      // ログのキャッシュ
       let lastLogText = null;
-      let lastLogAt = 0;
+      let lastLogAt   = 0;
+
+      // 勉強したことの内容キャッシュ
+      const knCache = new Map();
 
       function show(name) {
-        // 表示切り替え
-        Object.entries(views).forEach(([key, el]) => {
+        // 表示切替
+        Object.entries(views).forEach(([key, el])=>{
           el.classList.toggle('is-active', key === name);
         });
-        // タブの状態更新
-        tabs.forEach(btn => {
+        // タブ状態
+        tabs.forEach(btn=>{
           const active = btn.dataset.target === name;
           btn.classList.toggle('is-active', active);
           btn.setAttribute('aria-selected', active ? 'true' : 'false');
         });
         // ハッシュ更新
-        history.replaceState(null, '', '#' + name);
+        history.replaceState(null, '', '#'+name);
 
         // 初回処理
         if (name === 'gallery' && !galleryRendered) {
@@ -72,22 +106,25 @@
         } else if (name === 'time') {
           const now = Date.now();
           if (!lastLogText || now - lastLogAt > LOG_TTL_MS) {
-            fetchLog().catch(() => { });
+            fetchLog().catch(()=>{});
           } else {
             setLog(lastLogText, lastLogAt);
           }
+        } else if (name === 'knowledge' && !knowledgeRendered) {
+          renderKnowledge();
+          knowledgeRendered = true;
         }
       }
 
-      tabs.forEach(btn => {
-        btn.addEventListener('click', () => show(btn.dataset.target));
+      tabs.forEach(btn=>{
+        btn.addEventListener('click', ()=> show(btn.dataset.target));
       });
 
-      // ★ デフォルトは #time （ログ）
-      const h = (location.hash || '#time').replace('#', '');
-      show(h === 'gallery' ? 'gallery' : 'time');
+      // デフォルトは #time（ログ）
+      const h = (location.hash || '#time').replace('#','');
+      show(['gallery','knowledge'].includes(h) ? h : 'time');
 
-      // --- ギャラリー描画 ---
+      /* ---------- ギャラリー ---------- */
       function renderGallery() {
         const grid = document.getElementById('grid');
         if (!IMAGES.length) {
@@ -95,14 +132,14 @@
           return;
         }
         const frag = document.createDocumentFragment();
-        IMAGES.forEach(src => {
+        IMAGES.forEach(src=>{
           const fig = document.createElement('figure'); fig.className = 'card';
           const frame = document.createElement('div'); frame.className = 'frame';
           const img = document.createElement('img');
           img.loading = 'lazy'; img.decoding = 'async';
-          img.src = resolvePath(src);
+          img.src = resolvePathImage(src);
           img.alt = src.split('/').pop();
-          img.onerror = () => { img.alt = '(読み込み失敗) ' + img.alt; };
+          img.onerror = ()=>{ img.alt = '(読み込み失敗) ' + img.alt; };
           frame.appendChild(img);
           fig.appendChild(frame);
           const cap = document.createElement('figcaption'); cap.className = 'caption';
@@ -113,8 +150,8 @@
         grid.appendChild(frag);
       }
 
-      // --- ログ取得 ---
-      async function fetchLog(force = false) {
+      /* ---------- ログ ---------- */
+      async function fetchLog(force=false) {
         const status = document.getElementById('log-status');
         status.textContent = '取得中…';
         const res = await fetch(
@@ -124,26 +161,86 @@
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const text = await res.text();
         lastLogText = text;
-        lastLogAt = Date.now();
+        lastLogAt   = Date.now();
         setLog(text, lastLogAt);
       }
-
       function setLog(text, ts) {
         const pre = document.getElementById('log');
         pre.textContent = text;
         const status = document.getElementById('log-status');
         const d = new Date(ts);
-        status.textContent = `取得: ${d.toLocaleString()}（キャッシュ ${Math.floor(LOG_TTL_MS / 1000)}秒）`;
+        status.textContent = `取得: ${d.toLocaleString()}（キャッシュ ${Math.floor(LOG_TTL_MS/1000)}秒）`;
       }
 
-      function resolvePath(p) {
+      /* ---------- 勉強したこと ---------- */
+      function renderKnowledge() {
+        const listEl = document.getElementById('kn-list');
+        const countEl = document.getElementById('kn-count');
+
+        if (!KNOWLEDGE.length) {
+          listEl.innerHTML = '<p class="muted">テキストが登録されていません（KNOWLEDGE 配列に追加してください）。</p>';
+          countEl.textContent = 'ファイル数: 0';
+          return;
+        }
+
+        const frag = document.createDocumentFragment();
+        KNOWLEDGE.forEach(name=>{
+          const fig = document.createElement('figure'); fig.className = 'card';
+          const btn = document.createElement('button');
+          btn.className = 'btn kn-item';
+          btn.type = 'button';
+          btn.textContent = name;         // テキスト名のみ表示
+          btn.addEventListener('click', ()=> openKnowledge(name));
+          fig.appendChild(btn);
+          frag.appendChild(fig);
+        });
+        listEl.appendChild(frag);
+        countEl.textContent = 'ファイル数: ' + KNOWLEDGE.length;
+
+        // 閉じるボタン
+        document.getElementById('kn-close').addEventListener('click', ()=>{
+          document.getElementById('kn-viewer').classList.add('hidden');
+        });
+      }
+
+      async function openKnowledge(name) {
+        const viewer = document.getElementById('kn-viewer');
+        const label  = document.getElementById('kn-current');
+        const pre    = document.getElementById('kn-content');
+
+        label.textContent = name;
+
+        try {
+          // キャッシュがあればそれを表示、なければ取得
+          let text = knCache.get(name);
+          if (!text) {
+            const res = await fetch(resolvePathText(name), { cache: 'reload' });
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            text = await res.text();
+            knCache.set(name, text);
+          }
+          pre.textContent = text;
+          viewer.classList.remove('hidden');
+          // スクロール位置を内容パネルに寄せる（モバイル配慮）
+          viewer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } catch (e) {
+          pre.textContent = '読み込みエラー: ' + (e?.message || e);
+          viewer.classList.remove('hidden');
+        }
+      }
+
+      /* ---------- パス解決 ---------- */
+      function resolvePathImage(p) {
         if (/^https?:\/\//i.test(p)) return p;
         if (p.startsWith('./') || p.startsWith('../') || p.startsWith('/')) return p;
         return GALLERY_BASE + p;
       }
+      function resolvePathText(p) {
+        if (/^https?:\/\//i.test(p)) return p;
+        if (p.startsWith('./') || p.startsWith('../') || p.startsWith('/')) return p;
+        return KNOWLEDGE_BASE + p;
+      }
     })();
   </script>
 </body>
-
 </html>
-
