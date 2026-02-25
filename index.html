@@ -1,153 +1,46 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Gallery & Log (Fast SPA)</title>
-  <style>
-    /* === ダークモード風 共通 === */
-    :root {
-      --bg: #0f1419;
-      --bg-elev: #141a21;
-      --text: #e5e7eb;
-      --muted: #9ca3af;
-      --accent: #60a5fa;
-      --danger: #f87171;
-      --tabbar-h: 48px;
-      --shadow-1: 0 1px 2px rgba(0,0,0,.5);
-      --shadow-2: 0 8px 24px rgba(0,0,0,.35);
-    }
-    * { box-sizing: border-box; }
-    html, body { height: 100%; }
-    body {
-      margin: 0;
-      background: var(--bg);
-      color: var(--text);
-      font: 14px/1.6 system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans JP", Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
-    }
-
-    /* === タブバー === */
-    .tabbar {
-      position: sticky; top: 0; z-index: 10;
-      display: flex; align-items: stretch; gap: 4px;
-      height: var(--tabbar-h);
-      background: linear-gradient(180deg, #0f1419 0%, #111821 100%);
-      padding: 6px;
-      border-bottom: 1px solid rgba(255,255,255,.06);
-      box-shadow: var(--shadow-1);
-    }
-    .tabbar .tab {
-      appearance: none; border: 0; background: transparent;
-      color: var(--muted); padding: 8px 14px; border-radius: 8px; cursor: pointer;
-      transition: background .15s ease, color .15s ease;
-    }
-    .tabbar .tab:hover { background: rgba(255,255,255,.06); color: var(--text); }
-    .tabbar .tab.is-active { background: rgba(96,165,250,.12); color: var(--accent); font-weight: 600; }
-
-    /* === ビュー === */
-    .main { height: 100%; }
-    .view {
-      display: none;
-      min-height: calc(100vh - var(--tabbar-h));
-      padding: 16px;
-      content-visibility: auto; /* 非表示領域の描画コスト最小化 */
-    }
-    .view.is-active { display: block; }
-    .muted { color: var(--muted); }
-    .error { color: var(--danger); }
-
-    /* === ギャラリー === */
-    .toolbar {
-      display: flex; gap: 8px; align-items: center; margin-bottom: 12px; flex-wrap: wrap;
-    }
-    .btn {
-      appearance: none; border: 1px solid rgba(255,255,255,.08);
-      background: #18212b; color: var(--text); padding: 6px 10px; border-radius: 8px; cursor: pointer;
-    }
-    .btn:hover { background: #1c2631; }
-    .grid {
-      display: grid; gap: 16px;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    }
-    .card { display: flex; flex-direction: column; gap: 8px; }
-    .caption { color: var(--muted); font-size: 12px; }
-
-    /* 額縁風 */
-    .frame {
-      position: relative; padding: 14px; border-radius: 12px;
-      background: #0c1015; border: 1px solid rgba(255,255,255,.05);
-      box-shadow: 0 2px 8px rgba(0,0,0,.6), inset 0 0 0 1px rgba(255,255,255,.03);
-    }
-    .frame::before {
-      content: ""; position: absolute; inset: -6px; border-radius: 14px;
-      background: linear-gradient(135deg, #272f39, #1b2129);
-      box-shadow: var(--shadow-2); z-index: -1;
-    }
-    .frame img {
-      display: block; width: 100%; height: auto; border-radius: 8px;
-      box-shadow: 0 0 0 1px rgba(255,255,255,.04);
-    }
-
-    /* === ログ === */
-    .logbox {
-      display: block; width: 100%; max-width: 1200px; margin: 0 auto;
-      padding: 12px 14px; background: var(--bg-elev);
-      border: 1px solid rgba(255,255,255,.06); border-radius: 8px;
-      box-shadow: var(--shadow-1); color: var(--text);
-      overflow: auto; white-space: pre;
-    }
-    .logbar { display:flex; gap:8px; align-items:center; margin-bottom: 12px; flex-wrap: wrap; }
-    .time { color: var(--muted); font-size: 12px; }
-    /* スクロールバー */
-    *::-webkit-scrollbar { height:10px; width:10px; }
-    *::-webkit-scrollbar-thumb { background:#2a3440; border-radius:8px; }
-    *::-webkit-scrollbar-thumb:hover { background:#344152; }
-    *::-webkit-scrollbar-track { background:#0f1419; }
-  </style>
+  <link rel="stylesheet" href="./index.css" />
 </head>
+
 <body>
   <header class="tabbar" role="tablist" aria-label="ビュー切替">
-    <button class="tab is-active" role="tab" aria-selected="true" data-target="gallery">ギャラリー</button>
-    <button class="tab" role="tab" aria-selected="false" data-target="time">ログ</button>
+    <!-- タブ順を「ログ → ギャラリー」に逆転、デフォルトはログをアクティブに -->
+    <button class="tab is-active" role="tab" aria-selected="true" data-target="time">ログ</button>
+    <button class="tab" role="tab" aria-selected="false" data-target="gallery">ギャラリー</button>
   </header>
 
   <main class="main">
-    <!-- ギャラリー -->
-    <section id="view-gallery" class="view is-active" aria-labelledby="tab-gallery">
-      <div class="toolbar">
-        <span id="img-count" class="muted">画像枚数: 0</span>
-        <button id="copy-names" class="btn">画像名をコピー</button>
-      </div>
-      <div id="grid" class="grid" aria-live="polite"></div>
-    </section>
-
-    <!-- ログ -->
-    <section id="view-time" class="view" aria-labelledby="tab-time">
+    <!-- ログ（デフォルト表示） -->
+    <section id="view-time" class="view is-active" aria-labelledby="tab-time">
       <div class="logbar">
-        <button id="refresh-log" class="btn">最新を取得</button>
         <span id="log-status" class="time">未取得</span>
       </div>
       <pre id="log" class="logbox" aria-label="log.txt の内容（読み取り専用）"></pre>
+    </section>
+
+    <!-- ギャラリー（非表示で開始） -->
+    <section id="view-gallery" class="view" aria-labelledby="tab-gallery">
+      <div id="grid" class="grid" aria-live="polite"></div>
     </section>
   </main>
 
   <script>
     /*** 設定エリア（必要に応じて編集） ****************************/
-    // 画像ファイル名を「直接」書く（manifestは使わない）
-    // 例: ["a.png","b.png","sub/c.png"]
     const IMAGES = [
-      // ←ここに PNG ファイル名（またはサブフォルダ付きパス）を列挙
-      // 例:
-      // "001.png", "002.png", "sub/003.png"
-      "background.png","yatai.png","ramain.png","soukun.png","nngk.png"
+      "background.png", "yatai.png", "ramain.png", "sokun.png", "nngk.png"
     ];
-    const GALLERY_BASE = "./gallery/";     // 画像の基準パス
-    const LOG_URL = "./public/log.txt";     // ログファイル
-    const LOG_TTL_MS = 30 * 1000;           // ログキャッシュ 30秒
+    const GALLERY_BASE = "./gallery/";   // 画像の基準パス
+    const LOG_URL = "./public/log.txt"; // ログファイル
+    const LOG_TTL_MS = 30 * 1000;      // ログキャッシュ 30秒
     /***************************************************************/
 
-    // タブ切替（高速：DOM表示のみ）
-    (function initTabs(){
+    (function initTabs() {
       const tabs = Array.from(document.querySelectorAll('.tabbar .tab'));
       const views = {
         gallery: document.getElementById('view-gallery'),
@@ -159,25 +52,27 @@
       let lastLogAt = 0;
 
       function show(name) {
-        Object.entries(views).forEach(([key, el])=>{
+        // 表示切り替え
+        Object.entries(views).forEach(([key, el]) => {
           el.classList.toggle('is-active', key === name);
         });
-        tabs.forEach(btn=>{
+        // タブの状態更新
+        tabs.forEach(btn => {
           const active = btn.dataset.target === name;
           btn.classList.toggle('is-active', active);
           btn.setAttribute('aria-selected', active ? 'true' : 'false');
         });
-        history.replaceState(null, '', '#'+name);
+        // ハッシュ更新
+        history.replaceState(null, '', '#' + name);
 
-        // 初回だけ描画/取得
+        // 初回処理
         if (name === 'gallery' && !galleryRendered) {
           renderGallery();
           galleryRendered = true;
         } else if (name === 'time') {
-          // 30秒以内ならキャッシュ表示、切れたら再取得
           const now = Date.now();
           if (!lastLogText || now - lastLogAt > LOG_TTL_MS) {
-            fetchLog().catch(()=>{});
+            fetchLog().catch(() => { });
           } else {
             setLog(lastLogText, lastLogAt);
           }
@@ -188,17 +83,15 @@
         btn.addEventListener('click', () => show(btn.dataset.target));
       });
 
-      // ハッシュで初期表示
-      const h = (location.hash || '#gallery').replace('#','');
-      show(h === 'time' ? 'time' : 'gallery');
+      // ★ デフォルトは #time （ログ）
+      const h = (location.hash || '#time').replace('#', '');
+      show(h === 'gallery' ? 'gallery' : 'time');
 
-      // ギャラリー描画
+      // --- ギャラリー描画 ---
       function renderGallery() {
         const grid = document.getElementById('grid');
-        const countEl = document.getElementById('img-count');
         if (!IMAGES.length) {
           grid.innerHTML = '<p class="muted">画像が登録されていません（IMAGES 配列に追加してください）。</p>';
-          countEl.textContent = '画像枚数: 0';
           return;
         }
         const frag = document.createDocumentFragment();
@@ -218,25 +111,16 @@
           frag.appendChild(fig);
         });
         grid.appendChild(frag);
-        countEl.textContent = '画像枚数: ' + IMAGES.length;
-
-        // 「画像名をコピー」
-        document.getElementById('copy-names').addEventListener('click', async ()=>{
-          const names = IMAGES.map(s => s.split('/').pop()).join('\n');
-          try {
-            await navigator.clipboard.writeText(names);
-            notify('画像名をコピーしました。');
-          } catch {
-            notify('コピーに失敗しました。', true);
-          }
-        });
       }
 
-      // ログ取得
-      async function fetchLog(force=false) {
+      // --- ログ取得 ---
+      async function fetchLog(force = false) {
         const status = document.getElementById('log-status');
         status.textContent = '取得中…';
-        const res = await fetch(LOG_URL + (force ? ('?t=' + Date.now()) : ''), { cache: force ? 'no-store' : 'reload' });
+        const res = await fetch(
+          LOG_URL + (force ? ('?t=' + Date.now()) : ''),
+          { cache: force ? 'no-store' : 'reload' }
+        );
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const text = await res.text();
         lastLogText = text;
@@ -249,40 +133,16 @@
         pre.textContent = text;
         const status = document.getElementById('log-status');
         const d = new Date(ts);
-        status.textContent = `取得: ${d.toLocaleString()}（キャッシュ ${Math.floor(LOG_TTL_MS/1000)}秒）`;
+        status.textContent = `取得: ${d.toLocaleString()}（キャッシュ ${Math.floor(LOG_TTL_MS / 1000)}秒）`;
       }
-
-      document.getElementById('refresh-log').addEventListener('click', ()=>{
-        fetchLog(true).catch(e => {
-          document.getElementById('log').textContent = '読み込みエラー: ' + (e?.message || e);
-          document.getElementById('log-status').textContent = 'エラー';
-        });
-      });
 
       function resolvePath(p) {
         if (/^https?:\/\//i.test(p)) return p;
         if (p.startsWith('./') || p.startsWith('../') || p.startsWith('/')) return p;
         return GALLERY_BASE + p;
       }
-
-      function notify(msg, isErr=false) {
-        const el = document.createElement('div');
-        el.textContent = msg;
-        el.style.position = 'fixed';
-        el.style.left = '50%';
-        el.style.bottom = '16px';
-        el.style.transform = 'translateX(-50%)';
-        el.style.padding = '8px 12px';
-        el.style.background = isErr ? '#5b1d25' : '#1e2a36';
-        el.style.border = '1px solid rgba(255,255,255,.12)';
-        el.style.borderRadius = '8px';
-        el.style.color = 'white';
-        el.style.boxShadow = '0 6px 24px rgba(0,0,0,.35)';
-        el.style.zIndex = 9999;
-        document.body.appendChild(el);
-        setTimeout(()=>{ el.remove(); }, 1800);
-      }
     })();
   </script>
 </body>
+
 </html>
