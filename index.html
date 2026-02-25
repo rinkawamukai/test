@@ -45,8 +45,8 @@
 
       // ハッシュで初期タブ選択
       const h = location.hash.replace('#', '');
-      if (h === 'time') setActive('time.html');
-      else setActive('gallery.html');
+      if (h === 'gallery') setActive('gallery.html');
+      else setActive('time.html');
 
       // 画面高に応じて iframe の高さを調整（CSS計算に加えてモバイルアドレスバー対策）
       function resize() {
@@ -62,3 +62,4 @@
 
 
 </html>
+
