@@ -17,20 +17,17 @@
   </header>
 
   <main class="main">
-    <!-- ログ（デフォルト表示） -->
+    <!-- 早朝出勤日一覧（デフォルト表示） -->
     <section id="view-time" class="view is-active" aria-labelledby="tab-time">
-      <div class="logbar">
-        <span id="log-status" class="time">未取得</span>
-      </div>
-      <!-- 読み取り専用の生ログ -->
-      <pre id="log" class="logbox" aria-label="log.txt の内容（読み取り専用）"></pre>
+      <!-- 生ログ・取得ステータスは非表示（ご要望どおり削除） -->
 
-      <!-- ▼ 追加：各行をタップして .ics を開く（スマホ対応） -->
+      <!-- 案内 -->
       <div class="muted" style="margin:.5rem 0;">
-        ※ 下の各行をタップすると「前日21:00通知付き」の .ics を生成して開きます（カレンダーに登録）。
+        ※ 各行をタップすると「前日21:00通知付き」の .ics を生成して開きます（カレンダーに登録）。
       </div>
-      <div id="time-list" class="grid" aria-live="polite" aria-label="予定に登録する行一覧"></div>
-      <!-- ▲ 追加ここまで -->
+
+      <!-- 1行ずつ改行して並べる（シンプルな縦リスト） -->
+      <ul id="time-list" class="list" aria-live="polite" aria-label="予定に登録する行一覧" style="list-style:none; padding-left:0;"></ul>
     </section>
 
     <!-- ギャラリー -->
@@ -66,7 +63,6 @@
 
     // ログ
     const LOG_URL = "./public/log.txt";
-    const LOG_TTL_MS = 30 * 1000;   // ログキャッシュ 30秒
 
     // 勉強したこと（テキストファイルの「ファイル名だけ」を列挙）
     const KNOWLEDGE = [
@@ -88,10 +84,6 @@
       let galleryRendered = false;
       let knowledgeRendered = false;
 
-      // ログのキャッシュ
-      let lastLogText = null;
-      let lastLogAt = 0;
-
       // 勉強したことの内容キャッシュ
       const knCache = new Map();
 
@@ -109,17 +101,15 @@
         // ハッシュ更新
         history.replaceState(null, '', '#' + name);
 
-        // 初回処理
+        // 初回・表示時処理
         if (name === 'gallery' && !galleryRendered) {
           renderGallery();
           galleryRendered = true;
         } else if (name === 'time') {
-          const now = Date.now();
-          if (!lastLogText || now - lastLogAt > LOG_TTL_MS) {
-            fetchLog().catch(() => { });
-          } else {
-            setLog(lastLogText, lastLogAt);
-          }
+          // 毎回、最新の log.txt を取得してリストを描画（キャッシュ制御表示は不要）
+          fetchAndRenderTime().catch(() => {
+            renderTimeLinks(''); // エラー時は空で
+          });
         } else if (name === 'knowledge' && !knowledgeRendered) {
           renderKnowledge();
           knowledgeRendered = true;
@@ -160,28 +150,11 @@
         grid.appendChild(frag);
       }
 
-      /* ---------- ログ ---------- */
-      async function fetchLog(force = false) {
-        const status = document.getElementById('log-status');
-        status.textContent = '取得中…';
-        const res = await fetch(
-          LOG_URL + (force ? ('?t=' + Date.now()) : ''),
-          { cache: force ? 'no-store' : 'reload' }
-        );
+      /* ---------- 早朝出勤日：log.txt を取得してリストを作成 ---------- */
+      async function fetchAndRenderTime() {
+        const res = await fetch(LOG_URL + '?t=' + Date.now(), { cache: 'no-store' });
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const text = await res.text();
-        lastLogText = text;
-        lastLogAt = Date.now();
-        setLog(text, lastLogAt);
-      }
-
-      function setLog(text, ts) {
-        const pre = document.getElementById('log');
-        pre.textContent = text;
-        const status = document.getElementById('log-status');
-        const d = new Date(ts);
-        status.textContent = `取得: ${d.toLocaleString()}（キャッシュ ${Math.floor(LOG_TTL_MS / 1000)}秒）`;
-        // ★ クリック可能な行リンクをレンダリング
         renderTimeLinks(text);
       }
 
@@ -259,15 +232,15 @@
         setTimeout(() => URL.revokeObjectURL(url), 4000);
       }
 
-      /* ---------- 各行（タップ）→ .ics 生成 ---------- */
+      /* ---------- 各行（タップ）→ .ics 生成（縦並び・1行ずつ改行） ---------- */
       function renderTimeLinks(text) {
-        const wrap = document.getElementById('time-list');
-        if (!wrap) return;
-        wrap.innerHTML = '';
+        const ul = document.getElementById('time-list');
+        if (!ul) return;
+        ul.innerHTML = '';
 
-        const lines = text.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+        const lines = (text || '').split(/\r?\n/).map(s => s.trim()).filter(Boolean);
         if (!lines.length) {
-          wrap.innerHTML = '<p class="muted">log.txt に有効な日付行がありません。</p>';
+          ul.innerHTML = '<li class="muted">log.txt に有効な日付行がありません。</li>';
           return;
         }
 
@@ -276,32 +249,33 @@
           if (!start) continue;
           const end = new Date(start.getTime() + 60 * 60 * 1000); // デフォルト1時間
 
-          // カード（行自体をタップターゲットに）
-          const card = document.createElement('figure');
-          card.className = 'card time-item';
+          const li = document.createElement('li');
+          li.style.margin = '0.25rem 0';
 
-          const link = document.createElement('a');
-          link.href = '#';
-          link.className = 'btn'; // 大きめヒット領域（見た目はボタンでもテキスト表示）
-          link.setAttribute('role', 'button');
-          link.setAttribute('aria-label', `${line} をカレンダー登録（.ics生成）`);
-          link.textContent = line;
+          const a = document.createElement('a');
+          a.href = '#';
+          a.className = 'row-link';
+          a.setAttribute('role', 'button');
+          a.setAttribute('aria-label', `${line} をカレンダー登録（.ics生成）`);
+          // 見やすいように等幅風に
+          a.style.display = 'inline-block';
+          a.style.padding = '0.5rem 0.75rem';
+          a.style.textDecoration = 'none';
+          a.style.border = '1px solid var(--border, #ddd)';
+          a.style.borderRadius = '6px';
+          a.style.background = 'var(--bg, #fff)';
+          a.style.color = 'inherit';
+          a.textContent = line;
 
-          link.addEventListener('click', (ev) => {
+          a.addEventListener('click', (ev) => {
             ev.preventDefault();
-            // ここで .ics を生成して即ダウンロード/オープン
             const ics = buildICS('早朝出勤', start, end);
             const fname = `${start.getFullYear()}${pad2(start.getMonth() + 1)}${pad2(start.getDate())}_${pad2(start.getHours())}${pad2(start.getMinutes())}.ics`;
             downloadICSFile(fname, ics);
           });
 
-          const cap = document.createElement('figcaption');
-          cap.className = 'caption muted';
-          cap.textContent = 'タップで .ics（前日21:00通知）';
-
-          card.appendChild(link);
-          card.appendChild(cap);
-          wrap.appendChild(card);
+          li.appendChild(a);
+          ul.appendChild(li);
         }
       }
 
