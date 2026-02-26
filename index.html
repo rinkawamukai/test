@@ -22,7 +22,15 @@
       <div class="logbar">
         <span id="log-status" class="time">未取得</span>
       </div>
+      <!-- 読み取り専用の生ログ -->
       <pre id="log" class="logbox" aria-label="log.txt の内容（読み取り専用）"></pre>
+
+      <!-- ▼ 追加：各行をタップして .ics を開く（スマホ対応） -->
+      <div class="muted" style="margin:.5rem 0;">
+        ※ 下の各行をタップすると「前日21:00通知付き」の .ics を生成して開きます（カレンダーに登録）。
+      </div>
+      <div id="time-list" class="grid" aria-live="polite" aria-label="予定に登録する行一覧"></div>
+      <!-- ▲ 追加ここまで -->
     </section>
 
     <!-- ギャラリー -->
@@ -166,12 +174,135 @@
         lastLogAt = Date.now();
         setLog(text, lastLogAt);
       }
+
       function setLog(text, ts) {
         const pre = document.getElementById('log');
         pre.textContent = text;
         const status = document.getElementById('log-status');
         const d = new Date(ts);
         status.textContent = `取得: ${d.toLocaleString()}（キャッシュ ${Math.floor(LOG_TTL_MS / 1000)}秒）`;
+        // ★ クリック可能な行リンクをレンダリング
+        renderTimeLinks(text);
+      }
+
+      /* ---------- .ics 生成ユーティリティ ---------- */
+      // 例: "2026/02/10(火) 8:39:00"（曜日は無視）
+      function parseJpDateLine(line) {
+        const m = line.trim().match(
+          /^(\d{4})\/(\d{1,2})\/(\d{1,2})(?:\(.+?\))?\s+(\d{1,2}):(\d{2})(?::(\d{2}))?$/
+        );
+        if (!m) return null;
+        const [_, yy, mm, dd, HH, MM, SS] = m;
+        return new Date(
+          Number(yy),
+          Number(mm) - 1,
+          Number(dd),
+          Number(HH),
+          Number(MM),
+          SS ? Number(SS) : 0,
+          0
+        );
+      }
+      function pad2(n) { return String(n).padStart(2, '0'); }
+      function formatUtcForICS(d) {
+        const y = d.getUTCFullYear();
+        const m = pad2(d.getUTCMonth() + 1);
+        const day = pad2(d.getUTCDate());
+        const hh = pad2(d.getUTCHours());
+        const mm = pad2(d.getUTCMinutes());
+        const ss = pad2(d.getUTCSeconds());
+        return `${y}${m}${day}T${hh}${mm}${ss}Z`;
+      }
+      function buildICS(title, startLocal, endLocal) {
+        // 前日 21:00（ローカル）を絶対UTCにして VALARM(TRIGGER) を仕込む
+        const alarmLocal = new Date(startLocal.getTime());
+        alarmLocal.setDate(alarmLocal.getDate() - 1);
+        alarmLocal.setHours(21, 0, 0, 0);
+
+        const now = new Date();
+        const uid = `${startLocal.getTime()}-${Math.random().toString(36).slice(2)}@fast-spa`;
+
+        const lines = [
+          'BEGIN:VCALENDAR',
+          'VERSION:2.0',
+          'PRODID:-//rin//fast-spa//JP',
+          'CALSCALE:GREGORIAN',
+          'METHOD:PUBLISH',
+          'BEGIN:VEVENT',
+          `UID:${uid}`,
+          `DTSTAMP:${formatUtcForICS(now)}`,
+          `SUMMARY:${title}`,
+          `DTSTART:${formatUtcForICS(startLocal)}`,
+          `DTEND:${formatUtcForICS(endLocal)}`,
+          'DESCRIPTION:log.txt から自動作成',
+          'BEGIN:VALARM',
+          'ACTION:DISPLAY',
+          'DESCRIPTION:前日21:00 リマインド',
+          `TRIGGER;VALUE=DATE-TIME:${formatUtcForICS(alarmLocal)}`,
+          'END:VALARM',
+          'END:VEVENT',
+          'END:VCALENDAR'
+        ];
+        return lines.join('\r\n');
+      }
+      function downloadICSFile(fileName, icsText) {
+        const blob = new Blob([icsText], { type: 'text/calendar;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        // a要素でダウンロード/オープン（iOS/Android両対応狙い）
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName; // 多くの環境で「カレンダーで開く」に誘導される
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        // URLは少し遅延して破棄（モバイル互換配慮）
+        setTimeout(() => URL.revokeObjectURL(url), 4000);
+      }
+
+      /* ---------- 各行（タップ）→ .ics 生成 ---------- */
+      function renderTimeLinks(text) {
+        const wrap = document.getElementById('time-list');
+        if (!wrap) return;
+        wrap.innerHTML = '';
+
+        const lines = text.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+        if (!lines.length) {
+          wrap.innerHTML = '<p class="muted">log.txt に有効な日付行がありません。</p>';
+          return;
+        }
+
+        for (const line of lines) {
+          const start = parseJpDateLine(line);
+          if (!start) continue;
+          const end = new Date(start.getTime() + 60 * 60 * 1000); // デフォルト1時間
+
+          // カード（行自体をタップターゲットに）
+          const card = document.createElement('figure');
+          card.className = 'card time-item';
+
+          const link = document.createElement('a');
+          link.href = '#';
+          link.className = 'btn'; // 大きめヒット領域（見た目はボタンでもテキスト表示）
+          link.setAttribute('role', 'button');
+          link.setAttribute('aria-label', `${line} をカレンダー登録（.ics生成）`);
+          link.textContent = line;
+
+          link.addEventListener('click', (ev) => {
+            ev.preventDefault();
+            // ここで .ics を生成して即ダウンロード/オープン
+            const ics = buildICS('早朝出勤', start, end);
+            const fname = `${start.getFullYear()}${pad2(start.getMonth() + 1)}${pad2(start.getDate())}_${pad2(start.getHours())}${pad2(start.getMinutes())}.ics`;
+            downloadICSFile(fname, ics);
+          });
+
+          const cap = document.createElement('figcaption');
+          cap.className = 'caption muted';
+          cap.textContent = 'タップで .ics（前日21:00通知）';
+
+          card.appendChild(link);
+          card.appendChild(cap);
+          wrap.appendChild(card);
+        }
       }
 
       /* ---------- 勉強したこと ---------- */
@@ -247,9 +378,3 @@
 </body>
 
 </html>
-
-
-
-
-
-
