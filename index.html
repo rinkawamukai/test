@@ -25,7 +25,8 @@
       </div>
 
       <!-- 1行ずつ改行して並べる（シンプルな縦リスト） -->
-      <ul id="time-list" class="list" aria-live="polite" aria-label="予定に登録する行一覧" style="list-style:none; padding-left:0;"></ul>
+      <ul id="time-list" class="list" aria-live="polite" aria-label="予定に登録する行一覧"
+        style="list-style:none; padding-left:0;"></ul>
     </section>
 
     <!-- ギャラリー -->
@@ -53,14 +54,25 @@
 
   <script>
     /*** 設定エリア *********************************************/
+    // supabaseの早朝対応日付テーブル
+    const PROJECT_URL = "https://dwlsymcihjjodvqfjkdf.supabase.co";
+    const API_KEY = "sb_publishable_ww6uMGGHKkjl3HVg07Rf6A_xZEo2pDd";
+    const TABLE = "testTable";
+    const headers = {
+      "apikey": API_KEY,
+      "Authorization": `Bearer ${API_KEY}`,
+      "Content-Type": "application/json",
+      "Prefer": "return=representation"
+    };
+    const elTbody = document.querySelector("#tbl tbody");
+    const elStatus = document.getElementById("status");
+    const elForm = document.getElementById("addForm");
+    const elDt = document.getElementById("dtLocal");
     // ギャラリー（PNGなど）
     const IMAGES = [
       "background.png", "yatai.png", "ramain.png", "sokun.png", "nngk.png"
     ];
     const GALLERY_BASE = "./gallery/";
-
-    // ログ
-    const LOG_URL = "./public/log.txt";
 
     // 勉強したこと（テキストファイルの「ファイル名だけ」を列挙）
     const KNOWLEDGE = [
@@ -107,7 +119,7 @@
         } else if (name === 'time') {
           // 毎回、最新の log.txt を取得してリストを描画（キャッシュ制御表示は不要）
           fetchAndRenderTime().catch(() => {
-            renderTimeLinks(''); // エラー時は空で
+            renderTimeFromRows(''); // エラー時は空で
           });
         } else if (name === 'knowledge' && !knowledgeRendered) {
           renderKnowledge();
@@ -150,12 +162,17 @@
       }
 
       /* ---------- 早朝出勤日：log.txt を取得してリストを作成 ---------- */
+
       async function fetchAndRenderTime() {
-        const res = await fetch(LOG_URL + '?t=' + Date.now(), { cache: 'no-store' });
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        const text = await res.text();
-        renderTimeLinks(text);
+        // 取得したい列だけ指定し、並び順を制御（必要なら where 句相当も追加可）
+        const url = `${PROJECT_URL}/rest/v1/${TABLE}`
+          + `?select=id,scheduled,created_at&order=scheduled.asc`;
+        const res = await fetch(url, { headers });
+        if (!res.ok) throw new Error('HTTP ' + res.status + ' ' + (await res.text()));
+        const rows = await res.json();      // [{ id, scheduled, created_at }, ...]
+        renderTimeFromRows(rows);
       }
+
 
       /* ---------- .ics 生成ユーティリティ ---------- */
       // 例: "2026/02/10(火) 8:39:00"（曜日は無視）
@@ -232,21 +249,25 @@
       }
 
       /* ---------- 各行（タップ）→ .ics 生成（縦並び・1行ずつ改行） ---------- */
-      function renderTimeLinks(text) {
+
+      function renderTimeFromRows(rows) {
         const ul = document.getElementById('time-list');
         if (!ul) return;
         ul.innerHTML = '';
 
-        const lines = (text || '').split(/\r?\n/).map(s => s.trim()).filter(Boolean);
-        if (!lines.length) {
-          ul.innerHTML = '<li class="muted">log.txt に有効な日付行がありません。</li>';
+        if (!rows || !rows.length) {
+          ul.innerHTML = '<li class="muted">Supabase に予定がありません。</li>';
           return;
         }
 
-        for (const line of lines) {
-          const start = parseJpDateLine(line);
-          if (!start) continue;
+        for (const r of rows) {
+          // r.scheduled は ISO 文字列（timestamptz）。Date に変換して扱う
+          const start = new Date(r.scheduled);
+          if (isNaN(+start)) continue;
           const end = new Date(start.getTime() + 60 * 60 * 1000); // デフォルト1時間
+
+          // 表示行に出す “見やすい日本語表記”
+          const line = formatJpLine(start); // 例: 2026/03/15(日) 09:30:00
 
           const li = document.createElement('li');
           li.style.margin = '0.25rem 0';
@@ -256,7 +277,6 @@
           a.className = 'row-link';
           a.setAttribute('role', 'button');
           a.setAttribute('aria-label', `${line} をカレンダー登録（.ics生成）`);
-          // 見やすいように等幅風に
           a.style.display = 'inline-block';
           a.style.padding = '0.5rem 0.75rem';
           a.style.textDecoration = 'none';
@@ -269,7 +289,8 @@
           a.addEventListener('click', (ev) => {
             ev.preventDefault();
             const ics = buildICS('早朝出勤', start, end);
-            const fname = `${start.getFullYear()}${pad2(start.getMonth() + 1)}${pad2(start.getDate())}_${pad2(start.getHours())}${pad2(start.getMinutes())}.ics`;
+            const fname = `${start.getFullYear()}${pad2(start.getMonth() + 1)}${pad2(start.getDate())}_`
+              + `${pad2(start.getHours())}${pad2(start.getMinutes())}.ics`;
             downloadICSFile(fname, ics);
           });
 
@@ -277,6 +298,7 @@
           ul.appendChild(li);
         }
       }
+
 
       /* ---------- 勉強したこと ---------- */
       function renderKnowledge() {
@@ -335,6 +357,13 @@
         }
       }
 
+      /* ---------- “YYYY/MM/DD(曜) HH:mm:ss” で見やすく表示 ---------- */
+      function formatJpLine(d) {
+        const w = ['日', '月', '火', '水', '木', '金', '土'][d.getDay()];
+        return `${d.getFullYear()}/${pad2(d.getMonth() + 1)}/${pad2(d.getDate())}(${w}) `
+          + `${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
+      }
+
       /* ---------- パス解決 ---------- */
       function resolvePathImage(p) {
         if (/^https?:\/\//i.test(p)) return p;
@@ -351,7 +380,3 @@
 </body>
 
 </html>
-
-
-
-
