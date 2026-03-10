@@ -24,6 +24,14 @@
         タップするとカレンダーに予定＋前日21:00にリマインド通知を登録します。
       </div>
 
+      <div style="margin:.5rem 0;">
+        <button id="btn-push-register" class="btn">
+          この端末を通知登録（エンドポイントをDBへ保存）
+        </button>
+        <span id="push-status" class="muted"></span>
+      </div>
+
+
       <!-- 1行ずつ改行して並べる（シンプルな縦リスト） -->
       <ul id="time-list" class="list" aria-live="polite" aria-label="予定に登録する行一覧"
         style="list-style:none; padding-left:0;"></ul>
@@ -58,6 +66,7 @@
     const PROJECT_URL = "https://dwlsymcihjjodvqfjkdf.supabase.co";
     const API_KEY = "sb_publishable_ww6uMGGHKkjl3HVg07Rf6A_xZEo2pDd";
     const TABLE = "testTable";
+    const VAPID_PUBLIC_KEY = "<あなたの VAPID 公開鍵（Base64URL）>";
     const headers = {
       "apikey": API_KEY,
       "Authorization": `Bearer ${API_KEY}`,
@@ -162,6 +171,71 @@
       }
 
       /* ---------- 早朝出勤日：log.txt を取得してリストを作成 ---------- */
+
+      // Base64URL → Uint8Array（PushManager.subscribe 用）
+      function urlBase64ToUint8Array(base64String) {
+        const padding = '='.repeat((4 - base64String.length % 4) % 4);
+        const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+        const raw = atob(base64); const out = new Uint8Array(raw.length);
+        for (let i = 0; i < raw.length; ++i) out[i] = raw.charCodeAt(i);
+        return out;
+      }
+
+      async function registerDeviceForPush() {
+        const $status = document.getElementById('push-status');
+        $status.textContent = '処理中…';
+
+        try {
+          // 1) SW 登録（済みなら既存登録を返す）
+          const reg = await navigator.serviceWorker.register('/sw.js');
+          await navigator.serviceWorker.ready; // ready 待ちが確実
+          // 2) 通知許可
+          const perm = await Notification.requestPermission();
+          if (perm !== 'granted') { $status.textContent = '許可が必要です'; return; }
+
+          // 3) Push に購読（VAPID 公開鍵を指定）
+          const subscription = await reg.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+          }); // → PushSubscription を取得（endpoint / keys）[1](https://developer.mozilla.org/en-US/docs/Web/API/PushManager/subscribe)
+
+          // 4) Supabase に保存（既存エンドポイントがあれば upsert でもOK）
+          const sub = subscription.toJSON(); // { endpoint, expirationTime, keys:{p256dh,auth} }[2](https://developer.mozilla.org/en-US/docs/Web/API/PushSubscription)
+          const body = JSON.stringify({
+            endpoint: sub.endpoint,
+            p256dh: sub.keys.p256dh,
+            auth: sub.keys.auth
+          });
+
+          // push_subscriptions に POST
+          const url = `${PROJECT_URL}/rest/v1/push_subscriptions`;
+          const res = await fetch(url, {
+            method: 'POST',
+            headers: {
+              apikey: API_KEY,
+              Authorization: `Bearer ${API_KEY}`,
+              'Content-Type': 'application/json',
+              Prefer: 'return=representation'
+            },
+            body
+          });
+          const text = await res.text();
+          if (!res.ok) throw new Error(`REST ${res.status}: ${text}`);
+
+          $status.textContent = '登録しました';
+        } catch (e) {
+          console.error(e);
+          document.getElementById('push-status').textContent = 'エラー: ' + (e?.message || e);
+        }
+      }
+
+      // ボタンにイベント接続（ユーザージェスチャー起点が推奨）
+      document.getElementById('btn-push-register')?.addEventListener('click', async () => {
+        if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+          alert('このブラウザはプッシュ通知に未対応です'); return;
+        }
+        await registerDeviceForPush();
+      });
 
       async function fetchAndRenderTime() {
         // 取得したい列だけ指定し、並び順を制御（必要なら where 句相当も追加可）
@@ -380,4 +454,3 @@
 </body>
 
 </html>
-
