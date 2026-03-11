@@ -17,3 +17,22 @@ self.addEventListener('notificationclick', (e) => {
   const url = e.notification.data?.url || '/';
   e.waitUntil(clients.openWindow(url));
 });
+
+
+self.addEventListener("install", (e) => {
+  console.log("ServiceWorker installed");
+  self.skipWaiting();
+});
+
+self.addEventListener("activate", (e) => {
+  console.log("ServiceWorker activated");
+  clients.claim();
+});
+
+// SPA用：常に index.html を返す
+self.addEventListener("fetch", (event) => {
+  if (event.request.mode === "navigate") {
+    event.respondWith(fetch("/index.html"));
+    return;
+  }
+});
