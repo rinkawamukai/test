@@ -10,7 +10,7 @@ THEN：Google Calendar → Quick add event
 pubDate      → 前日21:00（RFC-822）
 description  → 本来の予定時刻（例：2026/04/02 08:39）
 
-
+https://dwlsymcihjjodvqfjkdf.supabase.co/functions/v1/push-test
 
 1. Applet を作る
 
