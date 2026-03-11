@@ -1,6 +1,6 @@
 {
-    "name": "Rin Kawamukai App",
-    "short_name": "RinApp",
+    "name": "業務用ホームページ",
+    "short_name": "業務用",
     "start_url": "./index.html",
     "display": "standalone",
     "background_color": "#ffffff",
@@ -18,4 +18,5 @@
         }
     ]
 }
+
 
