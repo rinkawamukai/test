@@ -5,8 +5,8 @@ self.addEventListener('push', (event) => {
   const title = data.title ?? '通知';
   const options = {
     body: data.body ?? '',
-    icon: data.icon ?? './icon-192.png',
-    badge: data.badge ?? './badge-72.png',
+    icon: data.icon ?? './gallery/icon-192.png',
+    badge: data.badge ?? './gallery/badge-72.png',
     data: { url: data.url ?? '/' }
   };
   event.waitUntil(self.registration.showNotification(title, options));
