@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Gallery & Log (Fast SPA)</title>
+  <title>業務用ホームページ</title>
   <link rel="stylesheet" href="./index.css" />
   <link rel="manifest" href="./manifest.json">
 </head>
@@ -21,7 +21,6 @@
 
 <body>
   <header class="tabbar" role="tablist" aria-label="ビュー切替">
-    <!-- デフォルトはログをアクティブに -->
     <button class="tab is-active" role="tab" aria-selected="true" data-target="time">早朝出勤日一覧</button>
     <button class="tab" role="tab" aria-selected="false" data-target="gallery">川向ギャラリー</button>
     <button class="tab" role="tab" aria-selected="false" data-target="knowledge">川向ナレッジ　</button>
@@ -37,7 +36,7 @@
 
       <div style="margin:.5rem 0;">
         <button id="btn-push-register" class="btn">
-          この端末を通知登録（エンドポイントをDBへ保存）
+          この端末に通知を登録
         </button>
         <span id="push-status" class="muted"></span>
       </div>
@@ -465,3 +464,4 @@
 </body>
 
 </html>
+
