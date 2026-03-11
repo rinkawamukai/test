@@ -6,7 +6,7 @@ self.addEventListener('push', (event) => {
   const options = {
     body: data.body ?? '',
     icon: data.icon ?? './gallery/icon-192.png',
-    badge: data.badge ?? './gallery/badge-72.png',
+    badge: data.badge ?? './gallery/icon-192.png',
     data: { url: data.url ?? '/' }
   };
   event.waitUntil(self.registration.showNotification(title, options));
@@ -35,3 +35,4 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 });
+
