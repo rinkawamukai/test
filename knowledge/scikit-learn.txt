@@ -1,0 +1,24 @@
+データ分け関数を使う（分割）　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　from sklearn.model_selection import train_test_split
+回帰モデルを使う（回帰）　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　from sklearn.linear_model import LinearRegression
+分類モデルを使う（分類）　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　from sklearn.linear_model import LogisticRegression
+クラスタを使う（グループ分け）　　　　　　　　　　　　　　　　　　　　　　　　　　　　　from sklearn.cluster import KMeans
+データを整える（標準化）　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　from sklearn.preprocessing import StandardScaler
+正解率を出す（評価）　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　from sklearn.metrics import accuracy_score
+結果の表を出す（評価）　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　from sklearn.metrics import confusion_matrix
+
+
+機械学習をする（機械学習）　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　データからルールを作る
+データを分ける（分割）　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　train_test_split(X,y)→訓練とテスト
+モデルを作る（モデル）　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　予測する仕組み
+覚える（学習）　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　model.fit(X,y)→データを覚える
+予想する（予測）　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　model.predict(X)→結果を出す
+どれだけ当たったか見る（精度）　　　　　　　　　　　　　　　　　　　　　　　　　　　　model.score(X,y)→正解率
+数字を予測する（回帰）　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　LinearRegression()→数値予測
+YES/NOを予測する（分類）　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　LogisticRegression()
+グループ分けする（クラスタ）　　　　　　　　　　　　　　　　　　　　　　　　　　　　　KMeans()→似たものをまとめる
+正解率を出す（正解率）　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　accuracy_score(y_true,y_pred)
+当たり外れを表にする（混同行列）　　　　　　　　　　　　　　　　　　　　　　　　　　　confusion_matrix(y_true,y_pred)
+データの大きさをそろえる（標準化）　　　　　　　　　　　　　　　　　　　　　　　　　　StandardScaler()
+データを変換する（変換）　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　scaler.fit_transform(X)
+fitとは？（学習）　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　データを覚える処理
+predictとは？（予測）　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　結果を出す処理
