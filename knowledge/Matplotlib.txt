@@ -1,27 +1,27 @@
 import matplotlib.pyplot as plt
 
-折れ線グラフを作る（プロット）　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　plt.plot(x,y,label="one")→点を線でつなぐグラフ、xとyの要素数は同じでないとエラー
+折れ線グラフを作る         　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　plt.plot(x,y,label="one")→点を線でつなぐグラフ、xとyの要素数は同じでないとエラー
                                                                                               ラベルは不要だが、あるとregend()で表示できる
 線の色を変える（色）　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　plt.plot(x,y,color="red")→赤になる
-線を点線にする（線スタイル）　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　plt.plot(x,y,linestyle="--")→点線になる。（"-"→実線、":"→点々、"-."→破線）
-点をつける（マーカー）　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　plt.plot(x,y,marker="o")→点を表示。（"s"→四角、"x"→ばつ）
+線を点線にする　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　plt.plot(x,y,linestyle="--")→点線になる。（"-"→実線、":"→点々、"-."→破線）
+点をつける　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　plt.plot(x,y,marker="o")→点を表示。（"s"→四角、"x"→ばつ）
 これらの短縮表記　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　plt.plot(x,y,"r--o")
 グラフを表示する（表示）　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　plt.show()→グラフを画面に出す
 
-タイトルをつける（タイトル）　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　plt.title("売上")→上に文字が出る
+題名をつける         　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　plt.title("売上")→上に文字が出る
 
-横の軸に名前をつける（x軸ラベル）　　　　　　　　　　　　　　　　　　　　　　　　　　　　　plt.xlabel("月")→横の意味を書く
-縦の軸に名前をつける（y軸ラベル）　　　　　　　　　　　　　　　　　　　　　　　　　　　　　plt.ylabel("売上")→縦の意味を書く
+横の軸に名前をつける　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　plt.xlabel("月")→横の意味を書く
+縦の軸に名前をつける　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　plt.ylabel("売上")→縦の意味を書く
 
-線の意味を表示する（label）　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　plt.legend()→どの線が何か表示
-点だけのグラフをつくる（散布図）　　　　　　　　　　　　　　　　　　　　　　　　　　　　plt.scatter(x,y)→点だけ表示
-データの数をグラフにする（ヒストグラム）　　　　　　　　　　　　　　　　　　　　　　　　　　plt.hist(data)→どの値が何個あるか
+線の意味を表示する　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　plt.legend()→どの線が何か表示
+点だけのグラフをつくる（散布図）　　　　　　　　　　　　　　　　　　　　　　　　　　　　　plt.scatter(x,y)→点だけ表示
+データの数をグラフにする　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　plt.hist(data)→どの値が何個あるか
 棒のグラフを作る（棒グラフ）　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　plt.bar(x,y)→縦の棒で表示
 円のグラフを作る（円グラフ）　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　plt.pie(data, labels=[a,b,c])→割合を円で表示
 円のグラフを作る,割合も表示　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　plt.pie(z, labels=["A", "B", "C"], autopct="%1.1f%%")→末尾に「%%」でn%みたいな表示になる
 
-背景に線を入れる（グリッド）　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　plt.grid(True)→見やすくする
-グラフの大きさを変える（サイズ）　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　plt.figure(figsize=(5,3))→横5縦3
-グラフを保存する（保存）　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　plt.savefig("a.png")→画像になる
-グラフを分ける（サブプロット）　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　plt.subplot(1,2,1)→横に2つに分けて、1番目のエリアに描く。
+背景に線を入れる　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　plt.grid(True)→見やすくする
+グラフの大きさを変える　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　plt.figure(figsize=(5,3))→横5縦3
+グラフを保存する　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　plt.savefig("a.png")→画像になる
+グラフを分ける　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　plt.subplot(1,2,1)→横に2つに分けて、1番目のエリアに描く。
 

@@ -1,41 +1,45 @@
+from sklearn.linear_model import LinearRegression　　　　　　　　　　　　　　　　　　　　回帰モデルインポート
+from sklearn.model_selection import train_test_split　　　　　　　　　　　　　　　　　　データ分け関数インポート
+from sklearn.preprocessing import StandardScaler　　　　　　　　　　　　　　　　　　　　標準化インポート
+from sklearn.metrics import mean_squared_error　　　　　　　　　　　　　　　　　　　　　モデルのはずれ具合をインポート
+from sklearn.linear_model import LogisticRegression　　　　　　　　　　　　　　　　　　分類モデルを使う（分類）
+from sklearn.metrics import accuracy_score　　　　　　　　　　　　　　　　　　　　　　　スコア用のモジュールをインポート
+from sklearn.metrics import confusion_matrix　　　　　　　　　　　　　　　　　　　　　　モデルのミスの分析
+from sklearn.metrics import precision_score, recall_score, f1_score　　　　　　　　　　結果解析インポート、適合率、再現率、バランス
+
+
+
+
 回帰モデルとは　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　LinearRegression→連続的な値を予測するモデル
-回帰モデルインポート　　　　　　　　　　　　 　　　　　　　　　　　　　　　　　　　　　　from sklearn.linear_model import LinearRegression
-データ分け関数インポート　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　from sklearn.model_selection import train_test_split
 入力を定義する（なんとよぶ？形式は？）　　　　　　　　　　　　　　　　　　　　　　　　　説明変数、特徴量、！二次元である必要あり
 出力を定義する（なんとよぶ？形式は？）　　　　　　　　　　　　　　　　　　　　　　　　　目的変数、1次元
                                                                                           X = [[1], [2], [3], [4], [5]]   # 入力（特徴）
                                                                                           y = [2, 4, 6, 8, 10]            # 出力（答え
 学習用データとテスト用データにわける　　　　　　　　　　　　　　　　　　　　　　　　　　　X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)random_stateは乱数のシード値
                                                                                           データを学習用8割、テスト用2割で扱う
-標準化インポート　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　from sklearn.preprocessing import StandardScaler
 標準化とは　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　数字をいじくって平均を0に、分散を1に（約分みたいな感じ）する
-標準化する　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　X_train = scaler.StandardScaler(X_train)  X_test = scaler.transform(X_test)→Xだけ
+標準化する　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　scaler = StandardScaler()
+　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　X_train = scaler.fit_transform(X_train)　→trainはfit_transformで学習＋標準化
+　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　X_test = scaler.transform(X_test)　→testはテストデータなのでfit（学習）してはいけない（yはしない）
 モデルを指定する　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　model = LinearRegression()
 学習させる　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　model.fit(X_train, y_train)
 予測させる　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　model.predict([[15]])
 モデルの当たり具合を評価　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　model.score(X_test, y_test)　→1.0がすべて当たってる
-モデルのはずれ具合をインポート　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　from sklearn.metrics import mean_squared_error
 モデルのはずれ具合を評価　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　mse = mean_squared_error(y_test, y_pred)　→小さいほどいい
 
 
 
 
-
 分類モデルとは　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　LogisticRegression→分類分け
-分類モデルを使う（分類）　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　from sklearn.linear_model import LogisticRegression
-スコア用のモジュールをインポート　　　　　　　　　　　　　　　　　　　　　　　　　　　　from sklearn.metrics import accuracy_score
 入出力を定義し、学習用データとテスト用データにわける　　　　　　　　　　　　　　　　　　X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)random_stateは乱数のシード値
 モデルを指定する　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　model = LogisticRegression()
 学習させる　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　model.fit(X_train, y_train)
 予測させる　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　model.predict([[15]])
 評価する　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　score = accuracy_score(y_test, model.predict(X_test))→答えとテストの2つを渡して、一致率を見る
-
-モデルのミスの分析　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　from sklearn.metrics import confusion_matrix
 x_testをすべて予想する　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　y_pred = model.predict(x_test)
 モデルを分析　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　confusion_matrix(y_test, y_pred)→NumPyの配列（ndarray）が返る
 　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　[[TN FP] [FN TP]]TFはTRUEとFALSE、PNはポジネガ。ポジネガは自動判定。ソートの後ろがポジ
 　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　TN→ネガと判定して答えがネガ、FP→ポジと判定して答えがネガ
-結果解析インポート　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　from sklearn.metrics import precision_score, recall_score, f1_score
 適合率とは　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　ポジと判定した中でどれだけ当たりか
 求め方　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　precision = precision_score(y_test, y_pred)　→1.0ならポジ予測したものはほぼ正確
 　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　precision = TP / (TP + FP)
