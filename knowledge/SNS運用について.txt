@@ -1,3 +1,25 @@
+Cloudflare Pages＋Google Search Console＋Googleビジネスプロフィールで集客
+{
+  "siteName": "正式なサービス名",
+  "siteOrigin": "https://取得した独自ドメイン",
+  "reservationEmail": "予約受付用メールアドレス",
+  "recruitEmail": "求人応募用メールアドレス",
+  "reservationSubject": "【予約相談】正式サービス名への問い合わせ",
+  "recruitSubject": "【求人応募】正式サービス名への応募",
+  "lineReserveUrl": "LINE公式アカウントの友だち追加URL",
+  "lineRecruitUrl": "LINE公式アカウントの友だち追加URL",
+  "phone": "公開する電話番号",
+  "businessName": "正式な事業名",
+  "serviceArea": [
+    "川越市",
+    "ふじみ野市",
+    "富士見市",
+    "志木市",
+    "朝霞市",
+    "和光市"
+  ]
+}
+
 OpenHands
 Unity（2022以降）で動作するAndroid向けゲームとして、
 以下を実装してください：
