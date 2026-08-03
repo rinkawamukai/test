@@ -156,30 +156,56 @@
       show(['gallery', 'knowledge'].includes(h) ? h : 'time');
 
       /* ---------- ギャラリー ---------- */
-      function renderGallery() {
-        const grid = document.getElementById('grid');
-        if (!IMAGES.length) {
-          grid.innerHTML = '<p class="muted">画像が登録されていません（IMAGES 配列に追加してください）。</p>';
-          return;
-        }
-        const frag = document.createDocumentFragment();
-        IMAGES.forEach(src => {
-          const fig = document.createElement('figure'); fig.className = 'card';
-          const frame = document.createElement('div'); frame.className = 'frame';
-          const img = document.createElement('img');
-          img.loading = 'lazy'; img.decoding = 'async';
-          img.src = resolvePathImage(src);
-          img.alt = src.split('/').pop();
-          img.onerror = () => { img.alt = '(読み込み失敗) ' + img.alt; };
-          frame.appendChild(img);
-          fig.appendChild(frame);
-          const cap = document.createElement('figcaption'); cap.className = 'caption';
-          cap.textContent = img.alt;
-          fig.appendChild(cap);
-          frag.appendChild(fig);
-        });
-        grid.appendChild(frag);
-      }
+function renderGallery() {
+  const grid = document.getElementById('grid');
+
+  if (!IMAGES.length) {
+    grid.innerHTML = '<p class="muted">画像が登録されていません（IMAGES 配列に追加してください）。</p>';
+    return;
+  }
+
+  const frag = document.createDocumentFragment();
+
+  IMAGES.forEach(src => {
+    const imagePath = resolvePathImage(src);
+    const fileName = src.split('/').pop();
+
+    const fig = document.createElement('figure');
+    fig.className = 'card';
+
+    const frame = document.createElement('div');
+    frame.className = 'frame';
+
+    // 画像クリックでダウンロード
+    const link = document.createElement('a');
+    link.href = imagePath;
+    link.download = fileName;
+    link.title = fileName + ' をダウンロード';
+
+    const img = document.createElement('img');
+    img.loading = 'lazy';
+    img.decoding = 'async';
+    img.src = imagePath;
+    img.alt = fileName;
+
+    img.onerror = () => {
+      img.alt = '(読み込み失敗) ' + fileName;
+    };
+
+    link.appendChild(img);
+    frame.appendChild(link);
+    fig.appendChild(frame);
+
+    const cap = document.createElement('figcaption');
+    cap.className = 'caption';
+    cap.textContent = fileName + ' クリックでダウンロード';
+
+    fig.appendChild(cap);
+    frag.appendChild(fig);
+  });
+
+  grid.appendChild(frag);
+}
 
       /* ---------- 早朝出勤日：log.txt を取得してリストを作成 ---------- */
 
