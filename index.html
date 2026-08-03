@@ -91,6 +91,15 @@
     const IMAGES = [
       "background.png", "yatai.png", "ramain.png", "sokun.png", "nngk.png"
     ];
+    const DOWNLOAD_BASE = "./downloads/";
+
+    const IMAGE_DOWNLOADS = {
+      "background.png": "dl.zip",
+      "yatai.png": "dl2.zip",
+      "ramain.png": "dl3.zip",
+      "sokun.png": "dl4.zip",
+      "nngk.png": "dl5.zip"
+    };
     const GALLERY_BASE = "./gallery/";
 
     // 勉強したこと（テキストファイルの「ファイル名だけ」を列挙）
@@ -168,7 +177,9 @@ function renderGallery() {
 
   IMAGES.forEach(src => {
     const imagePath = resolvePathImage(src);
-    const fileName = src.split('/').pop();
+    const imageName = src.split('/').pop();
+
+    const zipName = IMAGE_DOWNLOADS[imageName];
 
     const fig = document.createElement('figure');
     fig.className = 'card';
@@ -176,34 +187,44 @@ function renderGallery() {
     const frame = document.createElement('div');
     frame.className = 'frame';
 
-    // 画像クリックでダウンロード
-    const link = document.createElement('a');
-    link.href = imagePath;
-    link.download = fileName;
-    link.title = fileName + ' をダウンロード';
-
     const img = document.createElement('img');
     img.loading = 'lazy';
     img.decoding = 'async';
     img.src = imagePath;
-    img.alt = fileName;
+    img.alt = imageName;
 
     img.onerror = () => {
-      img.alt = '(読み込み失敗) ' + fileName;
+      img.alt = '(読み込み失敗) ' + imageName;
     };
 
-    link.appendChild(img);
-    frame.appendChild(link);
+    if (zipName) {
+      const link = document.createElement('a');
+      link.href = DOWNLOAD_BASE + zipName;
+      link.download = zipName;
+      link.title = zipName + ' をダウンロード';
+
+      link.appendChild(img);
+      frame.appendChild(link);
+    } else {
+      frame.appendChild(img);
+    }
+
     fig.appendChild(frame);
 
     const cap = document.createElement('figcaption');
     cap.className = 'caption';
-    cap.textContent = fileName + ' クリックでダウンロード';
+
+    if (zipName) {
+      cap.textContent = imageName + ' / クリックで ' + zipName + ' をダウンロード';
+    } else {
+      cap.textContent = imageName + ' / ZIP未設定';
+    }
 
     fig.appendChild(cap);
     frag.appendChild(fig);
   });
 
+  grid.innerHTML = '';
   grid.appendChild(frag);
 }
 
