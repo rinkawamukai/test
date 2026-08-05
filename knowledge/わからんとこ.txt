@@ -1,30 +1,13 @@
-①Cloudflare Pages + 独自ドメインを決める
+✅ Google Search Console
+✅ Bing Webmaster Tools
+✅ Google Analytics
 
-②メアド、LINE公式アカウントを作成する
-
-③プレースホルダを埋める
-__SITE_ORIGIN__
-https://tojo-cast.jp→最後に/はつけない
-https://rinkawamukai.github.io/tojo-castなど
-__RESERVE_EMAIL__、__RECRUIT_EMAIL__→メアド
-__LINE_RESERVE_URL__、__LINE_RECRUIT_URL__
-https://lin.ee/abc1234
-__PHONE_NUMBER__　→LINEまたはメールにて受付
-__SHORT_PLAN_PRICE__　→60分 12,000円
-__HALF_DAY_PLAN_PRICE__　→120分 20,000円〜
-__EVENT_PLAN_PRICE__　→その他料金プランは相談可能
-__PAYMENT_METHOD__　→施術前に現金手渡し or paypay送金でお願いいたします。
-__BUSINESS_TYPE__　サイト全体で使う短い事業名・サービス分類、短く具体的（店舗サポートスタッフ手配）
-__BUSINESS_DETAIL__　各ページで表示する、具体的な事業説明
+貴社を志望した理由は、住宅や建物といった、暮らしに必要な不可欠な要素を支える事業を展開しており、社会貢献性の高さに魅力を感じたため。
+私自身、システム運用を通じて利用者の日常業務を支えることにやりがいを感じてきました。
+社内SEは直接売上を生む立場ではありませんが、事業継続や業務効率化を通じて会社全体を支える重要な役割だと考えています。
+貴社の事業をITの側面から支え、従業員の皆様がより働きやすい環境づくりに貢献したいと考えています。
 
 
-④文面をブラッシュアップ
-
-⑤Cloudflare Pages + 独自ドメインで公開
-
-⑥Google Search Consoleに登録
-
-⑦Googleビジネスプロフィールに登録
 
 ・schedules.jsonは同じディレクトリ配下のものを読み込む
 ・対象のキャストをプルダウンで選択→スケジュールの文章を貼りつけたらjsonに反映されるというツールを作る
