@@ -2,21 +2,49 @@
 ✅ Bing Webmaster Tools
 ✅ Google Analytics
 
-私が貴社を志望する理由は、ユーザーや現場に徹底的に寄り添いながら、本質的な課題解決を実現するという考え方に強く共感したためです。
+・SEOがんばる
+　各駅ページを駅ページだけで完結させる
+　駅ページ同士のリンクを作る
+　紹介文を少しずつ変える
+　駅ページを全てインデックス登録
+　駅ごとFAQ追加
+　カフェなど時間をつぶせる周辺施設追加
+　indexの<h1>をサイト名に
+　headにこれ
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>東上キャスト | 川越〜和光市のサービス</title>
+  <meta name="description" content="東上線沿線のサービスサイトです。">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <meta property="og:site_name" content="東上キャスト">
 
-私はこれまでエンジニアとしてシステムの構築・運用に携わってきましたが、常に意識してきたのは「品質の高いシステムを作ること」ではなく、
-「そのシステムによってユーザーが喜び、課題が解決されること」でした。
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"WebSite",
+    "name":"東上キャスト",
+    "url":"https://example.com/"
+  }
+  </script>
+</head>
+<body>
+  <h1>東上キャスト</h1>
+  <p>Googleにサイト名を認識してもらうためのサンプルページです。</p>
+</body>
+</html>
 
-実際に業務を経験する中で、技術的に優れたシステムであっても、利用者の業務や現場の実態を十分に理解できていなければ、本当の価値は生み出せないと感じる場面が多くありました。
 
-その点、貴社は「企業を芯から元気にする」という理念のもと、机上の提案に終わらず、クライアントの現場に深く入り込みながら伴走して変革を実現することを重視されています。
-私はその姿勢に非常に魅力を感じています。
-今後はこれまで培ったIT領域の知識や経験を活かしながら、システムだけでなく事業や業務そのものの課題解決にも携わり、より大きな価値を提供できる人材になりたいと考えています。
-そのため、現場に寄り添いながら企業変革を支援する貴社を志望いたしました。
+・Androidアプリリリース　→12人
+・NISA10万円
+
+
+
+
 
 Googleフォーム、スプレッドシート、GASを使う
 フォームで予定を収集してスプシを更新する
 GASで週一でスクリプトを走らせてJSON生成、Githubにポストする
 
-
-Python 3.11　Nuitkaを使ってexeを作る。ソースを書いて
