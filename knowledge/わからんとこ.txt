@@ -1,43 +1,14 @@
-✅ Google Search Console
-✅ Bing Webmaster Tools
-✅ Google Analytics
+直近で配属予定チームの1日の流れ
 
-・SEOがんばる
-　各駅ページを駅ページだけで完結させる
-　駅ページ同士のリンクを作る
-　紹介文を少しずつ変える
-　駅ページを全てインデックス登録
-　駅ごとFAQ追加
-　カフェなど時間をつぶせる周辺施設追加
-　indexの<h1>をサイト名に
-　pngは192*192
+評価、昇給・昇格はどのような基準で行う？
+評価で失敗する人の特徴
 
-・Androidアプリリリース　→12人
-・NISA10万円
+昇給レンジは？
 
+繁忙期は平均残業時間
 
+採用を決めた理由と、足りない部分、伸ばした方がいい部分
 
+ポジションの離職理由
 
-<!doctype html>
-<html lang="ja">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>東上キャスト | 川越〜和光市のサービス</title>
-<meta name="description" content="東上線沿線のサービスサイトです。">
-<link rel="icon" type="image/png" href="favicon.png">
-<meta property="og:site_name" content="東上キャスト">
-<script type="application/ld+json">
-{
-  "@context":"https://schema.org",
-  "@type":"WebSite",
-  "name":"東上キャスト",
-  "url":"https://example.com/"
-}
-</script>
-</head>
-<body>
-<h1>東上キャスト</h1>
-<p>PNGファビコンとサイト名設定のサンプルです。</p>
-</body>
-</html>
+この会社の良い点と、正直大変な点
