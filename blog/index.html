@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>男性改善メディア｜恋愛・美容の実践知識</title>
+  <meta name="description" content="恋愛、清潔感、出会い、メンズ美容について、現場で得た具体例と実践方法をわかりやすく解説する男性向けメディアです。今日から試せる改善策を厳選して紹介します。">
+  <link rel="canonical" href="https://tojo-cast.com/blog/">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="ja_JP">
+  <meta property="og:site_name" content="男性改善メディア">
+  <meta property="og:title" content="男性改善メディア｜恋愛・美容の実践知識">
+  <meta property="og:description" content="恋愛、清潔感、出会い、メンズ美容を現場視点で解説する男性向けメディア。">
+  <meta property="og:url" content="https://tojo-cast.com/blog/">
+  <link rel="stylesheet" href="./style.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": "男性改善メディア",
+    "url": "https://tojo-cast.com/blog/",
+    "description": "恋愛、清潔感、出会い、メンズ美容について現場視点で解説する男性向けメディア。",
+    "inLanguage": "ja"
+  }
+  </script>
+</head>
+<body>
+  <div class="site-bg"></div>
+  <header class="top-header">
+    <a class="logo" href="./">男性改善メディア</a>
+    <nav class="main-nav" aria-label="メインナビゲーション">
+      <a href="#mens">男性向け</a>
+      <a href="#womens">女性向け</a>
+    </nav>
+  </header>
+
+  <main>
+    <!-- メディアの概要 -->
+    <section class="sub-hero compact-hero">
+      <p class="eyebrow">PRACTICAL KNOWLEDGE</p>
+      <h1>恋愛と美容を、実践できる知識に</h1>
+      <p class="lead">清潔感、出会い、コミュニケーションを現場視点で解説します。</p>
+    </section>
+
+    <!-- list.jsonからカテゴリ別の記事一覧を生成 -->
+    <div id="article-groups" class="section" aria-live="polite">
+      <section class="panel">
+        <h2>記事を読み込んでいます</h2>
+        <p class="muted">表示されない場合は、Webサーバー経由でアクセスしてください。</p>
+      </section>
+    </div>
+  </main>
+
+  <footer class="footer">© 男性改善メディア</footer>
+
+  <script>
+  (() => {
+    'use strict';
+    const labels = { mens: '男性向け', womens: '女性向け' };
+    const order = ['mens', 'womens'];
+    const container = document.getElementById('article-groups');
+
+    const createGroup = (category, articles) => {
+      const section = document.createElement('section');
+      section.className = 'panel';
+      section.id = category;
+
+      const label = document.createElement('p');
+      label.className = 'section-label';
+      label.textContent = category.toUpperCase();
+
+      const heading = document.createElement('h2');
+      heading.textContent = labels[category] || category;
+
+      const links = document.createElement('div');
+      links.className = 'station-links';
+      articles
+        .sort((a, b) => b.date.localeCompare(a.date))
+        .forEach((article) => {
+          const link = document.createElement('a');
+          link.href = `./${encodeURIComponent(article.category)}/${encodeURIComponent(article.slug)}/`;
+
+          const title = document.createElement('strong');
+          title.textContent = article.title;
+          const description = document.createElement('span');
+          description.textContent = article.description;
+
+          link.append(title, description);
+          links.appendChild(link);
+        });
+
+      section.append(label, heading, links);
+      return section;
+    };
+
+    fetch('./list.json')
+      .then((response) => {
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return response.json();
+      })
+      .then((articles) => {
+        const groups = articles.reduce((result, article) => {
+          (result[article.category] ||= []).push(article);
+          return result;
+        }, {});
+        container.replaceChildren();
+        order.filter((category) => groups[category]).forEach((category) => {
+          container.appendChild(createGroup(category, groups[category]));
+        });
+        Object.keys(groups)
+          .filter((category) => !order.includes(category))
+          .forEach((category) => container.appendChild(createGroup(category, groups[category])));
+      })
+      .catch(() => {
+        container.innerHTML = '<section class="panel"><h2>記事一覧を取得できませんでした</h2><p class="muted">時間を置いて再読み込みしてください。</p></section>';
+      });
+  })();
+  </script>
+</body>
+</html>
