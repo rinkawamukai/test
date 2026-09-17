@@ -713,3 +713,52 @@ a:visited {
         padding: 16px
     }
 }
+
+
+/* Blog V3 color and emphasis additions. Existing classes above remain unchanged. */
+.blog-inline-emphasis {
+    display: inline;
+    color: #ffdc73;
+    font-weight: 800;
+    text-shadow: 0 0 18px rgba(255, 207, 90, .24)
+}
+.blog-color-bar {
+    height: 4px;
+    margin: 0 0 22px;
+    border: 0;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--blue), var(--purple), #ffcf5a)
+}
+.blog-article-body h2 {
+    border-bottom-color: rgba(155, 191, 255, .55)
+}
+.blog-article-body h3 {
+    color: #c8d9ff
+}
+.blog-summary-list li:nth-child(3n+1) {
+    border-left: 3px solid var(--blue)
+}
+.blog-summary-list li:nth-child(3n+2) {
+    border-left: 3px solid var(--purple)
+}
+.blog-summary-list li:nth-child(3n) {
+    border-left: 3px solid #ffcf5a
+}
+.blog-author {
+    border-color: rgba(124, 58, 237, .5);
+    background: linear-gradient(135deg, rgba(76, 127, 255, .1), rgba(124, 58, 237, .12))
+}
+.blog-author-role {
+    display: inline-block;
+    margin: 5px 0 12px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    color: #dfe8ff;
+    background: rgba(76, 127, 255, .2);
+    font-size: .82rem;
+    font-weight: 700
+}
+.blog-faq-item h3:before {
+    content: "Q. ";
+    color: #9bbfff
+}
