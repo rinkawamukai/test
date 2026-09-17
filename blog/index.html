@@ -1,13 +1,53 @@
 <!doctype html>
-<html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>男性改善メディア｜恋愛・美容の実践知識</title>
-<meta name="description" content="恋愛、清潔感、出会い、メンズ美容について、現場で得た具体例と実践方法をわかりやすく解説する男性向けメディアです。今日から試せる改善策を紹介します。">
-<link rel="canonical" href="https://tojo-cast.com/blog/">
-<meta property="og:type" content="website"><meta property="og:locale" content="ja_JP"><meta property="og:site_name" content="男性改善メディア"><meta property="og:title" content="男性改善メディア｜恋愛・美容の実践知識"><meta property="og:description" content="恋愛、清潔感、出会い、メンズ美容を現場視点で解説する男性向けメディア。"><meta property="og:url" content="https://tojo-cast.com/blog/">
-<link rel="stylesheet" href="./style.css">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"CollectionPage","name":"男性改善メディア","url":"https://tojo-cast.com/blog/","description":"恋愛、清潔感、出会い、メンズ美容を現場視点で解説する男性向けメディア。","inLanguage":"ja"}</script></head>
-<body><header class="site-header"><div class="header-inner"><a class="site-logo" href="./">男性改善メディア</a><nav class="site-nav" aria-label="カテゴリ"><a href="#mens">男性向け</a><a href="#womens">女性向け</a></nav></div></header>
-<main><section class="hero"><p class="eyebrow">PRACTICAL KNOWLEDGE</p><h1>恋愛と美容を、実践できる知識に</h1><p class="lead">清潔感、出会い、コミュニケーションを現場視点で解説します。</p></section>
-<!-- list.jsonは一覧生成にのみ使用。カテゴリリンクは高速なアンカージャンプ -->
-<div id="article-groups" class="wide-content"><section class="card"><h2 class="category-title">記事を読み込んでいます</h2></section></div></main><footer class="footer">© 男性改善メディア</footer>
-<script>(()=>{'use strict';const labels={mens:'男性向け',womens:'女性向け'},order=['mens','womens'],root=document.getElementById('article-groups');function section(category,items){const s=document.createElement('section');s.className='card category-section';s.id=category;const h=document.createElement('h2');h.className='category-title';h.textContent=labels[category]||category;const ul=document.createElement('ul');ul.className='article-list';items.sort((a,b)=>b.date.localeCompare(a.date)).forEach(a=>{const li=document.createElement('li'),link=document.createElement('a'),strong=document.createElement('strong'),span=document.createElement('span');link.href=`./${encodeURIComponent(a.category)}/${encodeURIComponent(a.slug)}/`;strong.textContent=a.title;span.textContent=a.description;link.append(strong,span);li.append(link);ul.append(li)});s.append(h,ul);return s}fetch('./list.json').then(r=>{if(!r.ok)throw Error();return r.json()}).then(items=>{const groups=Object.groupBy?Object.groupBy(items,x=>x.category):items.reduce((g,x)=>((g[x.category]??=[]).push(x),g),{});root.replaceChildren();[...order,...Object.keys(groups).filter(k=>!order.includes(k))].filter(k=>groups[k]).forEach(k=>root.append(section(k,groups[k]))) }).catch(()=>{root.innerHTML='<section class="card"><h2 class="category-title">記事一覧を取得できませんでした</h2><p>Webサーバー経由で再読み込みしてください。</p></section>'})})();</script></body></html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>男性改善メディア｜恋愛・美容の実践知識</title>
+  <meta name="description" content="恋愛、清潔感、出会い、メンズ美容について、現場で得た具体例と実践方法をわかりやすく解説する男性向けメディアです。今日から試せる改善策を紹介します。">
+  <link rel="canonical" href="https://tojo-cast.com/blog/">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="ja_JP">
+  <meta property="og:site_name" content="男性改善メディア">
+  <meta property="og:title" content="男性改善メディア｜恋愛・美容の実践知識">
+  <meta property="og:description" content="恋愛、清潔感、出会い、メンズ美容を現場視点で解説する男性向けメディア。">
+  <meta property="og:url" content="https://tojo-cast.com/blog/">
+  <link rel="stylesheet" href="./style.css">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"CollectionPage","name":"男性改善メディア","url":"https://tojo-cast.com/blog/","description":"恋愛、清潔感、出会い、メンズ美容を現場視点で解説する男性向けメディア。","inLanguage":"ja"}</script>
+</head>
+<body>
+  <div class="site-bg"></div>
+  <header class="top-header">
+    <a class="logo" href="./">男性改善メディア</a>
+    <nav class="main-nav" aria-label="カテゴリ">
+      <a href="#mens">男性向け</a><a href="#womens">女性向け</a>
+    </nav>
+  </header>
+  <main>
+    <section class="sub-hero compact-hero">
+      <p class="eyebrow">PRACTICAL KNOWLEDGE</p>
+      <h1>恋愛と美容を、実践できる知識に</h1>
+      <p class="lead">清潔感、出会い、コミュニケーションを現場視点で解説します。</p>
+    </section>
+    <!-- 一覧ページだけlist.jsonを読み込む -->
+    <div id="article-groups" class="blog-wide">
+      <section class="panel"><h2>記事を読み込んでいます</h2></section>
+    </div>
+  </main>
+  <footer class="footer">© 男性改善メディア</footer>
+  <script>
+  (()=>{'use strict';
+    const labels={mens:'男性向け',womens:'女性向け'},order=['mens','womens'];
+    const root=document.getElementById('article-groups');
+    const makeSection=(category,items)=>{
+      const section=document.createElement('section');section.className='panel blog-category-section';section.id=category;
+      const label=document.createElement('p');label.className='section-label';label.textContent=category.toUpperCase();
+      const h2=document.createElement('h2');h2.textContent=labels[category]||category;
+      const ul=document.createElement('ul');ul.className='blog-article-list';
+      items.sort((a,b)=>b.date.localeCompare(a.date)).forEach(a=>{const li=document.createElement('li'),link=document.createElement('a'),title=document.createElement('strong'),desc=document.createElement('span');link.href=`./${encodeURIComponent(a.category)}/${encodeURIComponent(a.slug)}/`;title.textContent=a.title;desc.textContent=a.description;link.append(title,desc);li.append(link);ul.append(li)});
+      section.append(label,h2,ul);return section;
+    };
+    fetch('./list.json').then(r=>{if(!r.ok)throw Error();return r.json()}).then(items=>{const groups=items.reduce((g,a)=>((g[a.category]??=[]).push(a),g),{});root.replaceChildren();[...order,...Object.keys(groups).filter(k=>!order.includes(k))].filter(k=>groups[k]).forEach(k=>root.append(makeSection(k,groups[k]))) }).catch(()=>{root.innerHTML='<section class="panel"><h2>記事一覧を取得できませんでした</h2><p class="muted">Webサーバー経由で再読み込みしてください。</p></section>'});
+  })();
+  </script>
+</body></html>
