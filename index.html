@@ -27,8 +27,7 @@
   </header>
 
   <main class="main">
-    <!-- 早朝出勤日一覧（デフォルト表示） -->
-    <section id="view-time" class="view is-active" aria-labelledby="tab-time">
+
 
       <div class="muted" style="margin:.5rem 0;">
         タップするとカレンダーに予定＋前日21:00にリマインド通知を登録します。
@@ -159,10 +158,6 @@
       tabs.forEach(btn => {
         btn.addEventListener('click', () => show(btn.dataset.target));
       });
-
-      // デフォルトは #time（ログ）
-      const h = (location.hash || '#time').replace('#', '');
-      show(['gallery', 'knowledge'].includes(h) ? h : 'time');
 
       /* ---------- ギャラリー ---------- */
 function renderGallery() {
